@@ -30,3 +30,9 @@
 
 # QtCreator Project Files
 *.txt.user
+
+# CMake Output directory
+build
+
+# the executable
+orchidReader
