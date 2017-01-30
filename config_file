@@ -1,0 +1,38 @@
+[StartConfig]
+# this is the path to the temporary file that the data for the overall database,
+# not the overall database itself, because this code may have multiple
+# simultaneous executions on different batches and because we cannot concurrently
+# modify an sqlite db we instead stage the data for the overall database and
+# the user uses a script later to write the data to the database, this needs to
+# be in quotes
+OverallDataTempPath="./overall_Dec03_output.csv"
+
+# this is the path to the file that will be created for the per batch database
+# since this file is only written by this process this program takes the database
+# file itself instead of a temporary file
+BatchDbPath="./Batch_TestRun.sqlite"
+
+# this is the path to the file that contains the list of paths of raw input
+# files to be parsed for this batch
+ListFilePath="./Test_ListFile.txt"
+
+# this is the nominal number of seconds to integrate files for
+HistIntegrationTime=600
+
+# this is the path to the log file this program will generate
+LogFilePath="./Batch_TestRun.log"
+
+# this is the file that contains information about the array configuration
+# and detector setup
+# Included is:
+#   Position mapping (offsets of detectors in inches, from the array position)
+#   HV Channel Mapping, which HV channels apply to which detectors
+#   Detector Types
+#   Energy Projection PSD Threshold
+#   PSD Projection Energy Threshold
+ArrayDataPath="./ArrayData.csv"
+
+ArrayXPosition=0.0
+ArrayYPosition=0.0
+
+[EndConfig]
