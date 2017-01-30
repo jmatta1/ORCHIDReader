@@ -1,5 +1,6 @@
 #This variable stores the name/path of the directory with all the object files will be (relative to the make file)
 OBJ_DIR=build
+EXE_FILE=orchidReader
 #get the number of cores
 NUM_CORES=$(shell cat /proc/cpuinfo | grep processor | wc --lines)
 
@@ -8,14 +9,14 @@ NUM_CORES=$(shell cat /proc/cpuinfo | grep processor | wc --lines)
 plain: 
 	@mkdir -p $(OBJ_DIR)/plain
 	@cd $(OBJ_DIR)/plain; cmake -DBUILD_TYPE=Plain ../../src; make -j $(NUM_CORES)
-	@mv $(OBJ_DIR)/plain/orchid ./orchid
+	@mv $(OBJ_DIR)/plain/$(EXE_FILE) ./$(EXE_FILE)
 
 #this builds the project with debug flags making it easier to attach a debugger and see what is happening
 .PHONY: debug
 debug: 
 	@mkdir -p $(OBJ_DIR)/debug
 	@cd $(OBJ_DIR)/debug; cmake -DBUILD_TYPE=Debug ../../src; make -j $(NUM_CORES)
-	@mv $(OBJ_DIR)/debug/orchid ./orchid
+	@mv $(OBJ_DIR)/debug/$(EXE_FILE) ./$(EXE_FILE)
 
 #this builds the project with debug flags and with optimization flags allowing you to attach a debugger
 #to see if the optimization is screwing something up
@@ -23,28 +24,28 @@ debug:
 opt_debug: 
 	@mkdir -p $(OBJ_DIR)/opt_debug
 	@cd $(OBJ_DIR)/opt_debug; cmake -DBUILD_TYPE=OptDebug ../../src; make -j $(NUM_CORES)
-	@mv $(OBJ_DIR)/opt_debug/orchid ./orchid
+	@mv $(OBJ_DIR)/opt_debug/$(EXE_FILE) ./$(EXE_FILE)
 	
 #this builds the project with no debug flags and with optimization flags making it run faster
 .PHONY: release
 release: 
 	@mkdir -p $(OBJ_DIR)/release
 	@cd $(OBJ_DIR)/release; cmake -DBUILD_TYPE=Release ../../src; make -j $(NUM_CORES)
-	@mv $(OBJ_DIR)/release/orchid ./orchid
+	@mv $(OBJ_DIR)/release/$(EXE_FILE) ./$(EXE_FILE)
 
 #this builds the project with the generic warning flags enabled to see where you might want to make changed
 .PHONY: warn
 warn:  
 	@mkdir -p $(OBJ_DIR)/warn
 	@cd $(OBJ_DIR)/warn; cmake -DBUILD_TYPE=Warn ../../src; make -j $(NUM_CORES)
-	@mv $(OBJ_DIR)/warn/orchid ./orchid
+	@mv $(OBJ_DIR)/warn/$(EXE_FILE) ./$(EXE_FILE)
 
 #this builds the project with the generic warning flags enabled to see where you might want to make changed
 .PHONY: warn_opt
 warn_opt: 
 	@mkdir -p $(OBJ_DIR)/warn_opt
 	@cd $(OBJ_DIR)/warn_opt; cmake -DBUILD_TYPE=WarnOpt ../../src; make -j $(NUM_CORES)
-	@mv $(OBJ_DIR)/warn_opt/orchid ./orchid
+	@mv $(OBJ_DIR)/warn_opt/$(EXE_FILE) ./$(EXE_FILE)
 
 .PHONY: everything
 everything: debug plain opt_debug release warn warn_opt
@@ -68,7 +69,7 @@ clean:
 #this runs clean and then removes the executable
 .PHONY: cleanall
 cleanall: clean
-	-rm -f orchid
+	-rm -f $(EXE_FILE)
 
 #this runs cleanall and then removes the obj directory
 .PHONY: superclean
