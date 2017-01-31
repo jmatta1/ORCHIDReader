@@ -14,7 +14,10 @@ project (OrchidReader)
 #               @ONLY)
 
 # force the existence of the BOOST library package
-find_package(Boost COMPONENTS log log_setup filesystem date_time REQUIRED)
+find_package(Boost COMPONENTS thread log log_setup filesystem date_time REQUIRED)
+#find the threading stuff, because we need it for the log
+find_package(Threads REQUIRED)
+
 # Add the generated file header directory in this way to allow files in the
 # utility directory to access the generated file as if it was
 include_directories("${PROJECT_BINARY_DIR}/Utility")
@@ -27,7 +30,7 @@ include_directories("${PROJECT_BINARY_DIR}")
 include(./CMakeFlagDefs.txt)
 
 # add our default g++ flags
-add_definitions(-m64 -std=c++14 -D_FILE_OFFSET_BITS=64)
+add_definitions(-m64 -std=c++14 -D_FILE_OFFSET_BITS=64 -lpthread)
 
 # a little hack to make Qt Creator a little happier when it runs cmake to get
 # the project files
@@ -65,3 +68,4 @@ add_executable(orchidReader ${SRCS} ${HDRS})
 
 # make sure that the system knows to link the boost libraries
 target_link_libraries(orchidReader ${Boost_LIBRARIES})
+target_link_libraries(orchidReader ${CMAKE_THREAD_LIBS_INIT})
