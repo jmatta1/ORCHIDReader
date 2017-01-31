@@ -39,7 +39,9 @@ enum LogSeverity
     Critical    = 5
 };
 
-//make a global logger
-BOOST_LOG_INLINE_GLOBAL_LOGGER_DEFAULT(Logger, boost::log::sources::severity_logger_mt<LogSeverity>)
+//make a global logger, it doesn't need to be multithread safe at the moment
+BOOST_LOG_INLINE_GLOBAL_LOGGER_DEFAULT(Logger, boost::log::sources::severity_logger<LogSeverity>)
+
+using LoggerType = boost::log::sources::severity_logger<LogSeverity>;
 
 #endif //ORCHIDREADER_SRC_UTILITY_ORCHIDREADERLOGGER_H
