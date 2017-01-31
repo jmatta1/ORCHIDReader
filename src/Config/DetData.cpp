@@ -23,7 +23,7 @@
 #include<iomanip>
 // includes from other libraries
 // includes from ORCHIDReader
-#include"Utlity/SortPermutation.h"
+#include"Utility/SortPermutation.h"
 
 namespace InputParser
 {
