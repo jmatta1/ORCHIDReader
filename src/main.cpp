@@ -24,6 +24,7 @@
 // includes from ORCHIDReader
 #include"Config/ParseFunctions.h"
 #include"Config/ConfigData.h"
+#include"Config/DetData.h"
 
 int main(int argc, char* argv[])
 {
@@ -39,10 +40,21 @@ int main(int argc, char* argv[])
     std::cout<<"\n";
     std::string configFileName(argv[1]);
     InputParser::ConfigData confData;
-    bool configParseGood = InputParser::parseValAndPrintConfigFile(&confData, configFileName);
+    bool configParseGood = InputParser::parseValAndPrintConfigFile(&confData,
+                                                                   configFileName,
+                                                                   std::cout);
     if(!configParseGood)
     {
         std::cout<<"Failed in config reading\n"<<std::endl;
+        return 1;
+    }
+    InputParser::DetData detData;
+    bool detDataParseGood = InputParser::parseValAndPrintDetDataFile(&detData,
+                                                                    confData.arrayDataPath,
+                                                                    std::cout);
+    if(!detDataParseGood)
+    {
+        std::cout<<"Failed in detector data reading\n"<<std::endl;
         return 1;
     }
     //3) create the ORCHID data reader
