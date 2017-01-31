@@ -21,8 +21,11 @@
 
 // includes for C system headers
 // includes for C++ system headers
+#include<iostream>
 // includes from other libraries
 #include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/phoenix_operator.hpp>
+#include <boost/spirit/include/phoenix_object.hpp>
 #include <boost/phoenix/bind/bind_member_function.hpp>
 // includes from ORCHIDReader
 #include"ConfigData.h"
@@ -49,6 +52,8 @@ public:
         using qi::lexeme;
         using qi::float_;
         using Utility::eol_;
+        using qi::fail;
+        using qi::on_error;
         using Utility::separator;
         //define the rules to parse the parameters
         overalDbTempPath    = (lexeme["OverallDataTempPath"] >> '=' > quotedString [phoenix::bind(&ConfigData::overallDbTempPathSet,   ptr, qi::_1)] > separator);
@@ -70,15 +75,13 @@ public:
                 arrayXPos ^ arrayYPos
             ) > lexeme["[EndConfig]"];
         
-        on_error<fail>(
-                    start,
+        on_error<fail>(startRule,
                     std::cout << phoenix::val("Error! Expecting ")
-                    << qi::_4                             // what failed?
-                    << phoenix::val(" here: \n\"")
-                    << phoenix::construct<std::string>(qi::_3, qi::_2) // iterators to error-pos, end
-                    << phoenix::val("\"")
-                    << std::endl
-                    );
+                              << qi::_4                             // what failed?
+                              << phoenix::val(" here: \n\"")
+                              << phoenix::construct<std::string>(qi::_3, qi::_2) // iterators to error-pos, end
+                              << phoenix::val("\"")
+                              << std::endl);
     }
 private:
     //base rules for the file
