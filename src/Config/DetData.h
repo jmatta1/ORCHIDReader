@@ -24,7 +24,6 @@
 #include<vector>
 #include<iostream>
 // includes from other libraries
-#include <boost/spirit/include/qi.hpp>
 // includes from ORCHIDReader
 
 namespace InputParser
