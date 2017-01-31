@@ -13,6 +13,8 @@ project (OrchidReader)
 #               "${PROJECT_BINARY_DIR}/Utility/OrchidConfig.h"
 #               @ONLY)
 
+# force the existence of the BOOST library package
+find_package(Boost COMPONENTS log log_setup filesystem date_time REQUIRED)
 # Add the generated file header directory in this way to allow files in the
 # utility directory to access the generated file as if it was
 include_directories("${PROJECT_BINARY_DIR}/Utility")
@@ -47,8 +49,6 @@ endif(BUILD_TYPE STREQUAL "Release")
 
 # include the boost header dir in my system
 include_directories( ${Boost_INCLUDE_DIR} )
-# include the ncurses header dir
-include_directories( ${CURSES_INCLUDE_DIR} )
 
 # Grab all the source files
 file(GLOB_RECURSE SRCS *.cpp)
@@ -62,3 +62,6 @@ include_directories(".")
 
 # Set the executable and what it depends on
 add_executable(orchidReader ${SRCS} ${HDRS})
+
+# make sure that the system knows to link the boost libraries
+target_link_libraries(orchidReader ${Boost_LIBRARIES})
