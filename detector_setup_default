@@ -7,8 +7,8 @@
 #  6 - Det Y offset
 #  7 - Det Z offset
 #  8 - Det Type (Options are: NaI, LS, CeBr3, HeMod, HeUnmod)
-#  9 - Det Energy Projection PSD Threshold (projection will go from 0 to Thres)
-# 10 - Det PSD Projection Energy Threshold (projection will go from 0 to Thres)
+#  9 - Det PSD Projection Energy Threshold (projection will go from 0 to Thres)
+# 10 - Det Energy Projection PSD Threshold (projection will go from 0 to Thres)
 #0, 1,  2, 3,  4,   5,    6,    7,       8,       9,  10
  0, 0,  0, 1,  0, 0.0, 70.0, 73.0,      LS, 65532.0, 1.0
  1, 0,  1, 1,  1, 0.0,  9.0, 73.0,      LS, 65532.0, 1.0
