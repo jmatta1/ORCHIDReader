@@ -28,7 +28,7 @@
 
 namespace InputParser
 {
-namespace qi = boost::spirit::qi;
+
 enum class DetType : char {NaI, LS, CeBr3, HeMod, HeUnmod};
 // stream operator to output the DetType enum in a pretty way
 std::ostream& operator<<(std::ostream& os, const DetType& value);
