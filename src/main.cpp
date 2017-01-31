@@ -1,4 +1,29 @@
+/***************************************************************************//**
+********************************************************************************
+**
+** @file main.cpp
+** @author James Till Matta
+** @date 31 Jan, 2017
+** @brief
+**
+** @copyright Copyright (C) 2016 James Till Matta
+**
+** This program is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+**
+** @details Holds the implementation of the program's main function
+**
+********************************************************************************
+*******************************************************************************/
+// includes for C system headers
+// includes for C++ system headers
 #include<iostream>
+#include<string>
+// includes from other libraries
+// includes from ORCHIDReader
+#include"Config/ParseFunctions.h"
+#include"Config/ConfigData.h"
 
 int main(int argc, char* argv[])
 {
@@ -10,9 +35,16 @@ int main(int argc, char* argv[])
         return 0;
     }
     
-    //2) read in the configuration file
-    std::cout<<"Reading the configuration file at: "<<argv[1]<<std::endl;
-    
+    //2) read in the configuration files
+    std::cout<<"\n";
+    std::string configFileName(argv[1]);
+    InputParser::ConfigData confData;
+    bool configParseGood = InputParser::parseValAndPrintConfigFile(&confData, configFileName);
+    if(!configParseGood)
+    {
+        std::cout<<"Failed in config reading\n"<<std::endl;
+        return 1;
+    }
     //3) create the ORCHID data reader
     
     //4) create the output system
