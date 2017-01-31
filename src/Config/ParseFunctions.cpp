@@ -53,15 +53,13 @@ bool parseConfigFile(ConfigData* inParams, const std::string& inputFileName)
 bool parseValAndPrintConfigFile(ConfigData* inParams,
                                 const std::string& inputFileName, std::ostream& os)
 {
-    os << "Reading Configuration Data from "<<inputFileName<<std::endl;
+    os << "Reading Configuration Data from: "<<inputFileName<<std::endl;
     bool parseSuccess = parseConfigFile(inParams, inputFileName);
     if(!parseSuccess)
     {
         os<<"Could not parse "<<inputFileName<<std::endl;
         return false;
     }
-    os << "Configuration read is as follows: "<<std::endl;
-    os << *inParams << std::endl;
     
     if(!inParams->validate())
     {
@@ -91,15 +89,13 @@ bool parseValAndPrintDetDataFile(DetData* inParams,
                                  const std::string& inputFileName,
                                  std::ostream& os)
 {
-    os << "Reading Detector Data from "<<inputFileName<<std::endl;
+    os << "Reading Detector Data from: "<<inputFileName<<std::endl;
     bool parseSuccess = parseDetDataFile(inParams, inputFileName);
     if(!parseSuccess)
     {
         os<<"Could not parse "<<inputFileName<<std::endl;
         return false;
     }
-    os << "Detector Data read is as follows: "<<std::endl;
-    os << *inParams << std::endl;
     
     if(!inParams->validate())
     {
