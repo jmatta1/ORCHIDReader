@@ -16,9 +16,6 @@ BatchDbPath="./Batch_TestRun.sqlite"
 # files to be parsed for this batch
 ListFilePath="./Test_ListFile.txt"
 
-# this is the nominal number of seconds to integrate files for
-HistIntegrationTime=600
-
 # this is the path to the log file this program will generate
 LogFilePath="./Batch_TestRun.log"
 
@@ -30,12 +27,15 @@ LogFilePath="./Batch_TestRun.log"
 #   Detector Types
 #   Energy Projection PSD Threshold
 #   PSD Projection Energy Threshold
-ArrayDataPath="./ArrayData.csv"
+ArrayDataPath="./detector_setup_default"
 
 # X and Y positions of the array, 0,0 is the hinge corner of the back door of
 # the MIF, positive X is towards the reactor wall, positive Y is towards the
 # big door to the outside, and positive Z is up
 ArrayXPosition=142.0  # Out of the way X position is: 234.0
 ArrayYPosition=73.0  # Out of the way Y position is: 73.0
+
+# this is the nominal number of seconds to integrate files for
+HistIntegrationTime=600.0
 
 [EndConfig]
