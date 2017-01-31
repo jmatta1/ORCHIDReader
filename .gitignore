@@ -36,3 +36,12 @@ build
 
 # the executable
 orchidReader
+
+# the log files
+*.log
+
+# the sqlite files
+*.sqlite
+
+# the temp files to dump to sqlite later
+*.sqlite.temp
