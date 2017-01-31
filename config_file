@@ -5,7 +5,7 @@
 # modify an sqlite db we instead stage the data for the overall database and
 # the user uses a script later to write the data to the database, this needs to
 # be in quotes
-OverallDataTempPath="./overall_Dec03_output.csv"
+OverallDataTempPath="./overall_Dec03_output.sqlite.temp"
 
 # this is the path to the file that will be created for the per batch database
 # since this file is only written by this process this program takes the database
