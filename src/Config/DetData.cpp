@@ -198,16 +198,16 @@ void DetData::sort()
 std::ostream& operator<<(std::ostream& os, const DetData& dd)
 {
     using std::setw;
-    os<<"DetNum| DigiBrdNum| DigiChnNum| MpodBrdNum| MpodChnNum| XOffset| YOffset| ZOffset| DetType| ProjEnThresh| ProjPsdThresh"<<std::endl;
-    os<<"=======================================================================================================================";
+    os<<"DetNum | DigiBrdNum | DigiChnNum | MpodBrdNum | MpodChnNum | XOffset | YOffset | ZOffset | DetType | ProjEnThresh | ProjPsdThresh"<<std::endl;
+    os<<"=================================================================================================================================";
     for(int i=0; i<dd.detectorNum.size(); ++i)
     {
-        os<<"\n"<<setw(6)<<dd.detectorNum[i] << "| "<<setw(10)<<dd.digiBoardNum[i];
-        os<<"| "<<setw(10)<<dd.digiChanNum[i] << "| "<<setw(10)<<dd.mpodBoardNum[i];
-        os<<"| "<<setw(10)<<dd.mpodChanNum[i] << "| "<<setw(7)<<dd.detXOffset[i];
-        os<<"| "<<setw(7)<<dd.detYOffset[i] << "| "<<setw(7)<<dd.detZOffset[i];
-        os<<"| "<<setw(7)<<dd.detType[i] << "| "<<setw(12)<<dd.psdProjEnThresh[i];
-        os<<"| "<<setw(13)<<dd.enProjPsdThresh[i];
+        os<<"\n"<<setw(6)<<dd.detectorNum[i] << " | "<<setw(10)<<dd.digiBoardNum[i];
+        os<<" | "<<setw(10)<<dd.digiChanNum[i] << " | "<<setw(10)<<dd.mpodBoardNum[i];
+        os<<" | "<<setw(10)<<dd.mpodChanNum[i] << " | "<<setw(7)<<dd.detXOffset[i];
+        os<<" | "<<setw(7)<<dd.detYOffset[i] << " | "<<setw(7)<<dd.detZOffset[i];
+        os<<" | "<<setw(7)<<dd.detType[i] << " | "<<setw(12)<<dd.psdProjEnThresh[i];
+        os<<" | "<<setw(13)<<dd.enProjPsdThresh[i];
     }
     os<<"\n"<<std::endl;
     return os;
