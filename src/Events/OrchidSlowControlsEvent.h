@@ -22,6 +22,7 @@
 // includes for C++ system headers
 // includes from other libraries
 // includes from ORCHIDReader
+#include"Events/OrchidSlowControlsSupport.h"
 
 namespace Events
 {
@@ -29,8 +30,26 @@ namespace Events
 class OrchidSlowControlsEvent
 {
 public:
-    void readEvent(char* buffer, unsigned long long approximateTime);
-    
+    int readEvent(char* buffer, unsigned long long approximateTime);
+    unsigned long long appxTime;
+    short numVoltageChannels = 0;
+    short numTemperatureChannels = 0;
+    int*    boardNumber;
+    int*    channelNumber;
+    float*  terminalVoltage;
+    float*  senseVoltage;
+    float*  setVoltage;
+    float*  current;
+    float*  rampUpRate;
+    float*  rampDownRate;
+    float*  maxCurrent;
+    float*  maxVoltage;
+    int*    currentTripTime;
+    int*    temperature;
+    int*    maxTemperature;
+    bool*   outputSwitch;
+    ChannelStatus*   channelStatus;
+    CrateStatus      crateStatus;
 };
 
 }
