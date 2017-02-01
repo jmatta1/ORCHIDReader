@@ -34,17 +34,17 @@ void OutputSystem::addOutputClass(OutputInterface* outputter)
 
 void OutputSystem::processingDone()
 {
-    for(auto x: outputs) x.done();
+    for(auto x: outputs) x->done();
 }
 
 void OutputSystem::passSlowControlsEvent(const Events::OrchidSlowControlsEvent& event)
 {
-    for(auto x: outputs) x.slowControlsEvent(event);
+    for(auto x: outputs) x->slowControlsEvent(event);
 }
 
 void OutputSystem::passDppPsdIntegralEvent(const Events::DppPsdIntegralEvent& event)
 {
-    for(auto x: outputs) x.dppPsdIntegralEvent(event);
+    for(auto x: outputs) x->dppPsdIntegralEvent(event);
 }
 
 }
