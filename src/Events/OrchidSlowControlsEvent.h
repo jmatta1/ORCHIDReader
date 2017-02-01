@@ -12,7 +12,7 @@
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 **
-** @details Holds the class for DPP-PSD events without waveforms
+** @details Holds the class for ORCHID slow controls events
 **
 ********************************************************************************
 *******************************************************************************/
