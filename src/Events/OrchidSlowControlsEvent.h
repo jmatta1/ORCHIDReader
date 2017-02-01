@@ -30,13 +30,7 @@ class OrchidSlowControlsEvent
 {
 public:
     void readEvent(char* buffer, unsigned long long approximateTime);
-    unsigned long long apprTime;
-    unsigned char boardNumber;
-    unsigned char channelNumber;
-    unsigned long long timeStamp;
-    unsigned short longIntegral;
-    unsigned short shortIntegral;
-    unsigned char flags;//bit[0] = PUR flag, bit[1] = over-range, bit[2] = trigger lost
+    
 };
 
 }
