@@ -15,8 +15,12 @@ project (OrchidReader)
 
 # force the existence of the BOOST library package
 find_package(Boost COMPONENTS thread log log_setup filesystem date_time REQUIRED)
-#find the threading stuff, because we need it for the log
+# find the threading stuff, because we need it for the log
 find_package(Threads REQUIRED)
+# find ROOT stuff
+find_package(ROOT COMPONENTS Core Hist Tree REQUIRED)
+
+#MESSAGE( STATUS "Root Library List:    " ${ROOT_LIBRARIES})
 
 # Add the generated file header directory in this way to allow files in the
 # utility directory to access the generated file as if it was
