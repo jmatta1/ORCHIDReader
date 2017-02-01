@@ -59,7 +59,9 @@ public:
         overalDbTempPath    = (lexeme["OverallDataTempPath"] >> '=' > quotedString [phoenix::bind(&ConfigData::overallDbTempPathSet,   ptr, qi::_1)] > separator);
         batchDbPath         = (lexeme["BatchDbPath"]         >> '=' > quotedString [phoenix::bind(&ConfigData::batchDbPathSet,         ptr, qi::_1)] > separator);
         listFilePath        = (lexeme["ListFilePath"]        >> '=' > quotedString [phoenix::bind(&ConfigData::listFilePathSet,        ptr, qi::_1)] > separator);
+        rootFilePath        = (lexeme["RootFilePath"]        >> '=' > quotedString [phoenix::bind(&ConfigData::rootFilePathSet,        ptr, qi::_1)] > separator);
         logFilePath         = (lexeme["LogFilePath"]         >> '=' > quotedString [phoenix::bind(&ConfigData::logFilePathSet,         ptr, qi::_1)] > separator);
+        csvFilePath         = (lexeme["CsvFilePath"]         >> '=' > quotedString [phoenix::bind(&ConfigData::csvFilePathSet,         ptr, qi::_1)] > separator);
         arrayDataPath       = (lexeme["ArrayDataPath"]       >> '=' > quotedString [phoenix::bind(&ConfigData::arrayDataPathSet,       ptr, qi::_1)] > separator);
         histIntegrationTime = (lexeme["HistIntegrationTime"] >> '=' > float_       [phoenix::bind(&ConfigData::histIntegrationTimeSet, ptr, qi::_1)] > separator);
         arrayXPos           = (lexeme["ArrayXPosition"]      >> '=' > float_       [phoenix::bind(&ConfigData::arrayXPosSet,           ptr, qi::_1)] > separator);
@@ -72,7 +74,7 @@ public:
             > (
                 overalDbTempPath ^ batchDbPath ^ listFilePath ^
                 histIntegrationTime ^ logFilePath ^ arrayDataPath ^
-                arrayXPos ^ arrayYPos
+                arrayXPos ^ arrayYPos ^ rootFilePath ^ csvFilePath
             ) > lexeme["[EndConfig]"];
         
         on_error<fail>(startRule,
@@ -95,7 +97,7 @@ private:
     qi::rule<Iterator, qi::blank_type> overalDbTempPath, batchDbPath;
     qi::rule<Iterator, qi::blank_type> listFilePath, histIntegrationTime;
     qi::rule<Iterator, qi::blank_type> logFilePath, arrayDataPath, arrayXPos;
-    qi::rule<Iterator, qi::blank_type> arrayYPos;
+    qi::rule<Iterator, qi::blank_type> arrayYPos, rootFilePath, csvFilePath;
     
     // hold the pointer that we are going to bind to
     ConfigData* ptr;

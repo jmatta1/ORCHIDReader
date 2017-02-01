@@ -45,6 +45,21 @@ void ConfigData::listFilePathSet(const std::string& input)
     listFilePathSet_ = true;
 }
 
+void ConfigData::rootFilePathSet(const std::string& input)
+{
+    rootFilePath = input;
+    rootFilePathSet_ = true;
+}
+
+
+void ConfigData::csvFilePathSet(const std::string& input)
+{
+    csvFilePath = input;
+    csvFilePathSet_ = true;
+}
+
+
+
 void ConfigData::logFilePathSet(const std::string& input)
 {
     logFilePath = input;
@@ -79,8 +94,8 @@ bool ConfigData::validate()
 {
     bool retValue =  overallDbTempPathSet_ | batchDbPathSet_ |
                      listFilePathSet_ | histIntegrationTimeSet_ |
-                     logFilePathSet_ | arrayDataPathSet_ |
-                     arrayXPosSet_ | arrayYPosSet_;
+                     logFilePathSet_ | arrayDataPathSet_ | arrayXPosSet_ |
+                     arrayYPosSet_ | rootFilePathSet_ | csvFilePathSet_;
     
     if(histIntegrationTime <= 1.0)
     {
@@ -99,13 +114,21 @@ void ConfigData::printValidationErrors()
     {
         std::cout<<"    BatchDbPath must be set"<<std::endl;
     }
-    if(!listFilePathSet_)
-    {
-        std::cout<<"    ListFilePath must be set"<<std::endl;
-    }
     if(!logFilePathSet_)
     {
         std::cout<<"    LogFilePath must be set"<<std::endl;
+    }
+    if(!rootFilePathSet_)
+    {
+        std::cout<<"    RootFilePath must be set"<<std::endl;
+    }
+    if(!csvFilePathSet_)
+    {
+        std::cout<<"    CsvFilePath must be set"<<std::endl;
+    }
+    if(!listFilePathSet_)
+    {
+        std::cout<<"    ListFilePath must be set"<<std::endl;
     }
     if(!arrayDataPathSet_)
     {
@@ -135,8 +158,10 @@ std::ostream& operator<<(std::ostream& os, const ConfigData& cd)
 return os << "[StartConfig]\n"
     << "    OverallDataTempPath = "   << cd.overallDbTempPath   << "\n"
     << "    BatchDbPath         = "   << cd.batchDbPath         << "\n"
-    << "    ListFilePath        = "   << cd.listFilePath        << "\n"
+    << "    RootFilePath        = "   << cd.rootFilePath        << "\n"
+    << "    CsvFilePath         = "   << cd.csvFilePath         << "\n"
     << "    LogFilePath         = "   << cd.logFilePath         << "\n"
+    << "    ListFilePath        = "   << cd.listFilePath        << "\n"
     << "    ArrayDataPath       = "   << cd.arrayDataPath       << "\n"
     << "    ArrayXPosition      = "   << cd.arrayXPos           << "\n"
     << "    ArrayYPosition      = "   << cd.arrayYPos           << "\n"
