@@ -32,6 +32,7 @@
 #include"Config/ConfigData.h"
 #include"Config/DetData.h"
 #include"Utility/OrchidReaderLogger.h"
+#include"Output/OutputSystem.h"
 
 int main(int argc, char* argv[])
 {
@@ -61,7 +62,9 @@ int main(int argc, char* argv[])
         std::cout<<"Failed in detector data reading\n"<<std::endl;
         return 1;
     }
-    //3) initialize the logging file
+    //3) Calculate the board and channel to detector number mappings
+    detData.calculateMappings();
+    //4) initialize the logging file
     std::cout<<"Logging Start\n\n"<<std::endl;
     boost::log::register_simple_formatter_factory< LogSeverity, char >("Severity");
     boost::log::add_common_attributes();
@@ -80,19 +83,24 @@ int main(int argc, char* argv[])
     boost::log::core::get()->add_sink(coutSink);
     
     LoggerType& lg = Logger::get();
-    //4) show the user what data we read in
+    //5) show the user what data we read in
     BOOST_LOG_SEV(lg, Information) << "The configuration data read in is: \n" << confData << "\n";
     BOOST_LOG_SEV(lg, Information) << "The detector data read in is: \n" << detData << "\n";
     
-    //5) create the output system
+    //6) create the output system
+    BOOST_LOG_SEV(lg, Information) << "Creating base output system";
+    Output::OutputSystem* outSys = new Output::OutputSystem;
     
-    //6) create the output sub classes and add them to the system
+    //7) create the output classes and add them to the system
     
-    //7) create the ORCHID data reader
+    //8) create the ORCHID data reader
+
+    //9) run the processing loop
     
-    //8) run the processing loop
-    
-    //9) finalize the spectra
+    //10) finalize the spectra
+    outSys->processingDone();
+    //11) clean up the output system
+    delete outSys;
     
     return 0;
 }
