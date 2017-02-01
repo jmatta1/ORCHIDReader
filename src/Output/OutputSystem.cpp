@@ -27,7 +27,7 @@
 namespace Output
 {
 
-void OutputSystem::addOutputClass(OutputInterface* outputter)
+void OutputSystem::addOutputClass(std::unique_ptr<OutputInterface>&& outputter)
 {
     outputs.push_back(outputter);
 }

@@ -23,6 +23,7 @@
 // includes for C system headers
 // includes for C++ system headers
 #include<vector>
+#include<memory>
 // includes from other libraries
 // includes from ORCHIDReader
 #include"OutputInterface.h"
@@ -37,7 +38,7 @@ class OutputSystem
 public:
     
     //used in initial setup and finish
-    void addOutputClass(OutputInterface* outputter);
+    void addOutputClass(std::unique_ptr<OutputInterface>&& outputter);
     void processingDone();
     
     //for use by the output system
@@ -45,7 +46,7 @@ public:
     void passDppPsdIntegralEvent(const Events::DppPsdIntegralEvent& event);
     
 private:
-    std::vector<OutputInterface*> outputs;
+    std::vector<std::unique_ptr<OutputInterface> > outputs;
 };
 
 }
