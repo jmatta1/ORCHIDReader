@@ -73,3 +73,4 @@ add_executable(orchidReader ${SRCS} ${HDRS})
 # make sure that the system knows to link the boost libraries
 target_link_libraries(orchidReader ${Boost_LIBRARIES})
 target_link_libraries(orchidReader ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(orchidReader ${ROOT_LIBRARIES})
