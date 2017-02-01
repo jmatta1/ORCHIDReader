@@ -42,9 +42,7 @@ int main(int argc, char* argv[])
         std::cout<<"  "<<argv[0]<<" ConfigurationFile"<<std::endl;
         return 0;
     }
-    
-    
-    
+
     //2) read in the configuration files
     std::cout<<"\n";
     std::string configFileName(argv[1]);
@@ -63,8 +61,8 @@ int main(int argc, char* argv[])
         std::cout<<"Failed in detector data reading\n"<<std::endl;
         return 1;
     }
+    //3) initialize the logging file
     std::cout<<"Logging Start\n\n"<<std::endl;
-    //initialize the logging file
     boost::log::register_simple_formatter_factory< LogSeverity, char >("Severity");
     boost::log::add_common_attributes();
     typedef boost::log::sinks::synchronous_sink<boost::log::sinks::text_file_backend> FileSink;
@@ -82,15 +80,19 @@ int main(int argc, char* argv[])
     boost::log::core::get()->add_sink(coutSink);
     
     LoggerType& lg = Logger::get();
-    
+    //4) show the user what data we read in
     BOOST_LOG_SEV(lg, Information) << "The configuration data read in is: \n" << confData << "\n";
     BOOST_LOG_SEV(lg, Information) << "The detector data read in is: \n" << detData << "\n";
     
-    //3) create the ORCHID data reader
+    //5) create the output system
     
-    //4) create the output system
+    //6) create the output sub classes and add them to the system
     
-    //5) Pull events from the reader and dump them to output system
+    //7) create the ORCHID data reader
+    
+    //8) run the processing loop
+    
+    //9) finalize the spectra
     
     return 0;
 }
