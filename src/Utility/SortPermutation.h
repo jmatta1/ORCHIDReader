@@ -39,6 +39,17 @@ std::vector<std::size_t> oneKeySortPermutation(const std::vector<T>& key,
     return permutation;
 }
 
+template<typename T, typename Compare>
+std::vector<std::size_t>&& oneKeySortPermutationRval(const std::vector<T>& key,
+                                                     Compare& compare)
+{
+    std::vector<std::size_t> permutation(key.size());
+    std::iota(permutation.begin(), permutation.end(), 0);
+    std::sort(permutation.begin(), permutation.end(),
+        [&](std::size_t i, std::size_t j){ return compare(key[i], key[j]); });
+    return std::move(permutation);
+}
+
 //calculates the permutation required to order the secondary and primary key vectors
 template<typename T, typename Compare>
 std::vector<std::size_t> twoKeySortPermutation(const std::vector<T>& primaryKey,
@@ -55,6 +66,21 @@ std::vector<std::size_t> twoKeySortPermutation(const std::vector<T>& primaryKey,
     return permutation;
 }
 
+template<typename T, typename Compare>
+std::vector<std::size_t>&& twoKeySortPermutationRval(const std::vector<T>& primaryKey,
+                                               const std::vector<T>& secondaryKey,
+                                               Compare& compare)
+{
+    std::vector<std::size_t> permutation(primaryKey.size());
+    std::iota(permutation.begin(), permutation.end(), 0);
+    std::sort(permutation.begin(), permutation.end(),
+        [&](std::size_t i, std::size_t j){ return compare(primaryKey[i],
+                                                          primaryKey[j],
+                                                          secondaryKey[i],
+                                                          secondaryKey[j]); });
+    return std::move(permutation);
+}
+
 //takes the permutation vector and applies that permutation to a given vector
 template<typename T>
 std::vector<T> applyPermutation(std::vector<T>& input,
@@ -64,6 +90,16 @@ std::vector<T> applyPermutation(std::vector<T>& input,
     std::transform(permutation.begin(), permutation.end(), sorted.begin(),
         [&](std::size_t i){return input[i]; });
     return sorted;
+}
+
+template<typename T>
+std::vector<T>&& applyPermutationRval(std::vector<T>& input,
+                                const std::vector<std::size_t>& permutation)
+{
+    std::vector<T> sorted(permutation.size());
+    std::transform(permutation.begin(), permutation.end(), sorted.begin(),
+        [&](std::size_t i){return input[i]; });
+    return std::move(sorted);
 }
 
 struct OneKeyIntCompare
