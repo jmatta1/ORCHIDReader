@@ -36,6 +36,15 @@ std::ostream& operator<<(std::ostream& os, const DetType& value);
 class DetData
 {
 public:
+    ~DetData()
+    {
+        if(mappingsAllocated)
+        {
+            delete[] digiMap;
+            delete[] mpodMap;
+        }
+    }
+    
     std::vector<int> detectorNum;
     std::vector<int> digiBoardNum;
     std::vector<int> digiChanNum;
@@ -67,7 +76,21 @@ public:
     
     friend std::ostream& operator<<(std::ostream& os, const DetData& dd);
     
+    void calculateMappings();//must be called before digiToDet
+    
+    int digiToDet(int brd, int chan){return digiMap[(brd-digiBrdOffset)*numDigiChans + (chan-digiChanOffset)];}
+    int mpodToDet(int brd, int chan){return mpodMap[(brd-mpodBrdOffset)*numMpodChans + (chan-mpodChanOffset)];}
+    
 private:
+    bool mappingsAllocated = false;
+    int* digiMap;
+    int digiBrdOffset;
+    int digiChanOffset;
+    int numDigiChans;
+    int* mpodMap;
+    int mpodBrdOffset;
+    int mpodChanOffset;
+    int numMpodChans;
 };
 
 

@@ -180,7 +180,7 @@ void DetData::printValidationErrors()
 void DetData::sort()
 {
     Utility::OneKeyIntCompare comp;
-    std::vector<std::size_t> permutation = Utility::oneKeySortPermutation(detectorNum, comp);
+    std::vector<std::size_t> permutation(Utility::oneKeySortPermutation(detectorNum, comp));
     detectorNum = Utility::applyPermutation(detectorNum, permutation);
     digiBoardNum = Utility::applyPermutation(digiBoardNum, permutation);
     digiChanNum = Utility::applyPermutation(digiChanNum, permutation);
@@ -194,6 +194,62 @@ void DetData::sort()
     enProjPsdThresh = Utility::applyPermutation(enProjPsdThresh, permutation);
 }
 
+void DetData::calculateMappings()
+{
+    // find the maximum max and min digitizer board number, also how many digitizer boards are there
+    // same for the mpod channels
+    int numDet = detectorNum.size();
+    int minDigiBoard = 400000;
+    int maxDigiBoard = -1;
+    int minDigiChannel = 400000;
+    int maxDigiChannel = -1;
+    int minMpodBoard = 400000;
+    int maxMpodBoard = -1;
+    int minMpodChannel = 400000;
+    int maxMpodChannel = -1;
+    for(int i=0; i<numDet; ++i)
+    {
+        if(digiBoardNum[i] < minDigiBoard) minDigiBoard = digiBoardNum[i];
+        if(digiBoardNum[i] > maxDigiBoard) maxDigiBoard = digiBoardNum[i];
+        if(digiChanNum[i] < minDigiChannel) minDigiChannel = digiChanNum[i];
+        if(digiChanNum[i] > maxDigiChannel) maxDigiChannel = digiChanNum[i];
+
+        if(mpodBoardNum[i] < minMpodBoard) minMpodBoard = mpodBoardNum[i];
+        if(mpodBoardNum[i] > maxMpodBoard) maxMpodBoard = mpodBoardNum[i];
+        if(mpodChanNum[i] < minMpodChannel) minMpodChannel = mpodChanNum[i];
+        if(mpodChanNum[i] > maxMpodChannel) maxMpodChannel = mpodChanNum[i];
+    }
+    digiBrdOffset = minDigiBoard;
+    mpodBrdOffset = minMpodBoard;
+    digiChanOffset = minDigiChannel;
+    mpodChanOffset = minMpodChannel;
+    numDigiChans = (maxDigiChannel - minDigiChannel + 1);
+    numMpodChans = (maxMpodChannel - minMpodChannel + 1);
+    int digiMapSize = (maxDigiBoard - minDigiBoard + 1)*numDigiChans;
+    int mpodMapSize = (maxMpodBoard - minMpodBoard + 1)*numMpodChans;
+    digiMap = new int[digiMapSize];
+    mpodMap = new int[mpodMapSize];
+    mappingsAllocated = true;
+    //initialize everything
+    for(int i=0; i<digiMapSize; ++i)
+    {
+        digiMap[i] = -1;
+    }
+    for(int i=0; i<mpodMapSize; ++i)
+    {
+        mpodMap[i] = -1;
+    }
+    //now set the relevant cells to their det number
+    for(int i=0; i<numDet; ++i)
+    {
+        int brd = digiBoardNum[i];
+        int chan = digiChanNum[i];
+        digiMap[(brd-digiBrdOffset)*numDigiChans + (chan-digiChanOffset)] = detectorNum[i];
+        brd = mpodBoardNum[i];
+        chan = mpodChanNum[i];
+        mpodMap[(brd-mpodBrdOffset)*numMpodChans + (chan-mpodChanOffset)] = detectorNum[i];
+    }
+}
 
 std::ostream& operator<<(std::ostream& os, const DetData& dd)
 {
