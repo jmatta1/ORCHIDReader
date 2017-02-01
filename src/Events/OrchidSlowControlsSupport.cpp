@@ -30,42 +30,6 @@ CrateStatus::CrateStatus():         mainOn(false),          mainInhibit(false),
     plugAndPlayIncompatible(false), busReset(false),        supplyDerating(false),
     supplyFailure(false) {}
 
-std::string CrateStatus::getStatusString()
-{
-    std::ostringstream output;
-    if(mainOn)
-    {
-        output << "On ";
-    }
-    if(mainInhibit)
-    {
-        output << "Inhibit ";
-    }
-    if(localControlOnly)
-    {
-        output << "Lcl_Ctrl_Only ";
-    }
-    if(inputFailure || outputFailure || fantrayFailure || sensorFailure || vmeSysFailure || plugAndPlayIncompatible || supplyDerating || supplyFailure)
-    {
-        output << "Failure: ( ";
-        if(inputFailure) output << "input ";
-        if(outputFailure) output << "output ";
-        if(fantrayFailure) output << "fantray ";
-        if(sensorFailure) output << "sensor ";
-        if(vmeSysFailure) output << "VME_Sys ";
-        if(plugAndPlayIncompatible) output << "PnP_Incompatibility ";
-        if(supplyDerating) output << "PS_derating ";
-        if(supplyFailure) output << "PS_failure ";
-        output << ") ";
-        
-    }
-    if(busReset)
-    {
-        output << "Bus_Reset ";
-    }
-    return output.str();
-}
-
 void CrateStatus::loadFromValue(unsigned int value)
 {
     this->mainOn                  = ((value & CrateMasks::MaskMainOn)                  != 0);
@@ -129,39 +93,6 @@ ChannelStatus::ChannelStatus():          outputOn(false),
     outputAdjusting(true),               outputConstantVoltage(false),
     reserved2(false),                    outputCurrentBoundsExceeded(false),
     outputFailureCurrentLimit(false) {}
-
-std::string ChannelStatus::getStatusString()
-{
-    std::ostringstream output;
-    if(outputOn) output << "On ";
-    if(outputInhibit) output << "Inhibit ";
-    if(outputFailureMinSenseVoltage || outputFailureMaxSenseVoltage ||
-            outputFailureMaxTerminalVoltage || outputFailureMaxCurrent ||
-            outputFailureMaxTemperature || outputFailureMaxPower ||
-            outputFailureTimeout || outputEmergencyOff ||
-            outputCurrentBoundsExceeded || outputFailureCurrentLimit)
-    {
-        output << "Failure: ( ";
-        if(outputFailureMinSenseVoltage) output << "MinSense ";
-        if(outputFailureMaxSenseVoltage) output << "MaxSense ";
-        if(outputFailureMaxTerminalVoltage) output << "MaxTerm ";
-        if(outputFailureMaxCurrent) output << "MaxCurr ";
-        if(outputFailureMaxTemperature) output << "MaxTemp ";
-        if(outputFailureMaxPower) output << "MaxPower ";
-        if(outputFailureTimeout) output << "FailTimout ";
-        if(outputEmergencyOff) output << "EmerOff ";
-        if(outputCurrentBoundsExceeded) output << "OutOfCurrBounds ";
-        if(outputFailureCurrentLimit) output << "CurrLimFail ";
-        output << ") ";
-        
-    }
-    if(outputCurrentLimited) output << "OutCurLim ";
-    if(outputRampUp) output << "RampUp ";
-    if(outputRampDown) output << "RampDown ";
-    if(outputAdjusting) output << "FineAdj ";
-    if(outputConstantVoltage) output << "ConstVoltage ";
-    return output.str();
-}
 
 
 void ChannelStatus::loadFromValue(unsigned int value)

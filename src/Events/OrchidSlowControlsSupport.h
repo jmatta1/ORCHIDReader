@@ -51,7 +51,6 @@ public:
     bool supplyDerating          :1;//bit10
     bool supplyFailure           :1;//bit11     (LSB)
     
-    std::string getStatusString();
     void loadFromValue(unsigned int value);
     CrateStatus& operator=(const CrateStatus& rhs);
     unsigned int giveIntRepresentation();
@@ -95,7 +94,6 @@ public:
     bool outputCurrentBoundsExceeded     :1;//bit18
     bool outputFailureCurrentLimit       :1;//bit19     (LSB)
 
-    std::string getStatusString();
     void loadFromValue(unsigned int value);
     ChannelStatus& operator=(const ChannelStatus& rhs);
     unsigned int giveIntRepresentation();
