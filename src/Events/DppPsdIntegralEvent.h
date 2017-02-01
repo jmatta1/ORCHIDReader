@@ -12,7 +12,8 @@
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 **
-** @details Holds the class for DPP-PSD events without waveforms
+** @details Holds the definition of the class for DPP-PSD events without
+** waveforms
 **
 ********************************************************************************
 *******************************************************************************/
@@ -29,8 +30,8 @@ namespace Events
 class DppPsdIntegralEvent
 {
 public:
-    void readEvent(char* buffer, unsigned long long approximateTime);
-    unsigned long long apprTime;
+    int readEvent(char* buffer, unsigned long long approximateTime);
+    unsigned long long appxTime;
     unsigned char boardNumber;
     unsigned char channelNumber;
     unsigned long long timeStamp;
