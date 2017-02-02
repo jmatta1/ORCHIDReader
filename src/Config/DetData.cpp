@@ -207,8 +207,13 @@ void DetData::calculateMappings()
     int maxMpodBoard = -1;
     int minMpodChannel = 400000;
     int maxMpodChannel = -1;
+    int minDetNum = 400000;
+    int maxDetNum = -1;
     for(int i=0; i<numDet; ++i)
     {
+        if(detectorNum[i] < minDetNum) minDetNum = detectorNum[i];
+        if(detectorNum[i] > maxDetNum) maxDetNum = detectorNum[i];
+        
         if(digiBoardNum[i] < minDigiBoard) minDigiBoard = digiBoardNum[i];
         if(digiBoardNum[i] > maxDigiBoard) maxDigiBoard = digiBoardNum[i];
         if(digiChanNum[i] < minDigiChannel) minDigiChannel = digiChanNum[i];
@@ -223,14 +228,21 @@ void DetData::calculateMappings()
     mpodBrdOffset = minMpodBoard;
     digiChanOffset = minDigiChannel;
     mpodChanOffset = minMpodChannel;
+    detOffset = minDetNum;
     numDigiChans = (maxDigiChannel - minDigiChannel + 1);
     numMpodChans = (maxMpodChannel - minMpodChannel + 1);
     int digiMapSize = (maxDigiBoard - minDigiBoard + 1)*numDigiChans;
     int mpodMapSize = (maxMpodBoard - minMpodBoard + 1)*numMpodChans;
+    int detMapSize = (maxDetNum - minDetNum + 1);
     digiMap = new int[digiMapSize];
     mpodMap = new int[mpodMapSize];
+    detMap = new int[detMapSize];
     mappingsAllocated = true;
     //initialize everything
+    for(int i=0; i<detMapSize; ++i)
+    {
+        detMap[i] = -1;
+    }
     for(int i=0; i<digiMapSize; ++i)
     {
         digiMap[i] = -1;
@@ -248,6 +260,7 @@ void DetData::calculateMappings()
         brd = mpodBoardNum[i];
         chan = mpodChanNum[i];
         mpodMap[(brd-mpodBrdOffset)*numMpodChans + (chan-mpodChanOffset)] = detectorNum[i];
+        detMap[detectorNum[i] - detOffset] = i;
     }
 }
 

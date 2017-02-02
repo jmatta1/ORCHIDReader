@@ -42,6 +42,7 @@ public:
         {
             delete[] digiMap;
             delete[] mpodMap;
+            delete[] detMap;
         }
     }
     
@@ -80,6 +81,7 @@ public:
     
     int digiToDet(int brd, int chan){return digiMap[(brd-digiBrdOffset)*numDigiChans + (chan-digiChanOffset)];}
     int mpodToDet(int brd, int chan){return mpodMap[(brd-mpodBrdOffset)*numMpodChans + (chan-mpodChanOffset)];}
+    int detToInd(int detN){return detMap[detN - detOffset];}
     
 private:
     bool mappingsAllocated = false;
@@ -91,6 +93,8 @@ private:
     int mpodBrdOffset;
     int mpodChanOffset;
     int numMpodChans;
+    int* detMap;
+    int detOffset;
 };
 
 
