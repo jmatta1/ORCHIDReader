@@ -21,6 +21,7 @@
 // includes for C system headers
 // includes for C++ system headers
 #include<string>
+#include<sstream>
 // includes from other libraries
 #include"root/TFile.h"
 #include"root/TTree.h"
@@ -29,8 +30,7 @@
 // includes from ORCHIDReader
 #include"Output/OutputInterface.h"
 #include"Config/DetData.h"
-#include"Events/OrchidSlowControlsEvent.h"
-#include"Events/DppPsdIntegralEvent.h"
+#include"Config/ConfigData.h"
 
 namespace Output
 {
@@ -39,36 +39,43 @@ struct BatchTreeData
 {
     BatchTreeData(int numDet):numDetectors(numDet) {}
     ~BatchTreeData(){}
-    void clearRates();
+    void clearData();
     void setRates();
+    void setAverages(int numEntries);
 
+    int runNumber;
     unsigned long long startTime;
     unsigned long long stopTime;
     unsigned long long centerTime;
     double runTime;
-    float rouchCorrection;
-    float avgChanVolt;
-    float avgChanCurrent;
-    float avgHVChanTemp;
     int numDetectors;
+    float roughCorrection[32];
+    int detNum[32];
+    float avgChanVolt[32];
+    float avgChanCurrent[32];
+    float avgHVChanTemp[32];
     unsigned long long rawCounts[32];
     double rawRates[32];
 };
 
-class RootOutput : public OutputInterface
+class RootOutput // : public OutputInterface
 {
 public:
-    RootOutput(const std::string& outFileName, InputParser::DetData* dData);
+    RootOutput(InputParser::ConfigData* cData, InputParser::DetData* dData);
     virtual ~RootOutput();
     
-    virtual void slowControlsEvent(const Events::OrchidSlowControlsEvent& event);
-    virtual void dppPsdIntegralEvent(const Events::DppPsdIntegralEvent& event);
-    virtual void done();
+    void slowControlsEvent(const Events::OrchidSlowControlsEvent& event);
+    void dppPsdIntegralEvent(const Events::DppPsdIntegralEvent& event);
+    void inputFileSwitch(const Events::InputFileSwapEvent& event);
+    void done();
     
 private:
     //private member functions
-    bool closeRun();
-    bool initRun();
+    void prepTree();
+    void closeRun();
+    void prepTreeEntry();
+    void doRoughDtCorrections();
+    void initRun();
     
     //member data
     //data output members
@@ -78,16 +85,16 @@ private:
     TH2F** detSum2DHists;
     //RunNum vs En projection are calculated when done() is called
     //1D Histograms per run
-    TH1F** enProjWithCutoff;
-    TH1F** enProjWithoutCutoff;
-    TH1F** psdProjWithCutoff;
-    TH1F** psdProjWithoutCutoff;
+    TH1D** enProjWithCutoff;
+    TH1D** enProjWithoutCutoff;
+    TH1D** psdProjWithCutoff;
+    TH1D** psdProjWithoutCutoff;
+    TH1D** eventTimeHists;
     //1D Histograms sum
-    TH1F** enProjWithCutoffSum;
-    TH1F** enProjWithoutCutoffSum;
-    TH1F** psdProjWithCutoffSum;
-    TH1F** psdProjWithoutCutoffSum;
-    TH1F** eventTimeHistsSum;
+    TH1D** enProjWithCutoffSum;
+    TH1D** enProjWithoutCutoffSum;
+    TH1D** psdProjWithCutoffSum;
+    TH1D** psdProjWithoutCutoffSum;
     //Tree pointer and struct
     TTree* batchTree;
     BatchTreeData treeData;
@@ -95,11 +102,17 @@ private:
     //book keeping
     int numDetectors;
     unsigned long long runStartEpoch = 0;
+    unsigned long long lastEpoch = 0;
     unsigned long long runEndEpochTarget = 600000000;
-    unsigned long long runStartTimeStamp = 0;
-    unsigned runNumber = 0;
-    
-    
+    unsigned long long runStartTimeStamp[32];
+    unsigned long long lastTimeStamp[32];
+    int runNumber = -1;
+    int numSlowCtrls;
+    bool firstEvent = false;
+    int numTimeBin;
+    float maxTimeEdge;
+    //config data
+    InputParser::ConfigData* confData;
     InputParser::DetData* detData;
 };
 
