@@ -24,6 +24,7 @@
 // includes from ORCHIDReader
 #include"Events/OrchidSlowControlsEvent.h"
 #include"Events/DppPsdIntegralEvent.h"
+#include"Events/InputFileSwapEvent.h"
 
 namespace Output
 {
@@ -35,6 +36,7 @@ public:
     
     virtual void slowControlsEvent(const Events::OrchidSlowControlsEvent& event) = 0;
     virtual void dppPsdIntegralEvent(const Events::DppPsdIntegralEvent& event) = 0;
+    virtual void inputFileSwitch(const Events::InputFileSwapEvent& event) = 0;
     virtual void done() = 0;
 };
 
