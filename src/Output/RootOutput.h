@@ -76,6 +76,9 @@ private:
     void prepTreeEntry();
     void doRoughDtCorrections();
     void initRun();
+    void initSums();
+    void closeSums();
+    void constructTimeSeriesSpectra();
     
     //member data
     //data output members
@@ -101,9 +104,11 @@ private:
     
     //book keeping
     int numDetectors;
+    unsigned long long histIntTimeUs=0;
     unsigned long long runStartEpoch = 0;
     unsigned long long lastEpoch = 0;
     unsigned long long runEndEpochTarget = 600000000;
+    bool firstDetEvent[32];
     unsigned long long runStartTimeStamp[32];
     unsigned long long lastTimeStamp[32];
     int runNumber = -1;
