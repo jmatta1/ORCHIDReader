@@ -21,13 +21,12 @@
 // includes for C++ system headers
 // includes from other libraries
 #include"root/TParameter.h"
-#include"root/TVector.h"
-#include"root/TList.h"
 // includes from ORCHIDReader
 
 namespace Output
 {
 
+using std::ostringstream;
 static const int NumEnChannels = 8192;
 static const int NumPsdChannels = 1024;
 
@@ -69,7 +68,7 @@ void BatchTreeData::setAverages(int numEntries)
 }
 
 RootOutput::RootOutput(InputParser::ConfigData* cData, InputParser::DetData* dData):
-    confData(cData), detData(dData)
+    confData(cData), detData(dData), treeData(detData->detectorNum.size())
 {
     //set up the first level of arrays
     numDetectors = detData->detectorNum.size();
@@ -99,67 +98,55 @@ RootOutput::RootOutput(InputParser::ConfigData* cData, InputParser::DetData* dDa
     delete tempInt;
     delete arrayX;
     delete arrayY;
-    //detector numbers
-    TVector<int>* detVec = new TVector<int>(numDetectors);
-    TVector<int>* digiBrdVec = new TVector<int>(numDetectors);
-    TVector<int>* digiChanVec = new TVector<int>(numDetectors);
-    TVector<int>* mpodBrdVec = new TVector<int>(numDetectors);
-    TVector<int>* mpodChanVec = new TVector<int>(numDetectors);
-    TVector<float>* xPositions = new TVector<float>(numDetectors);
-    TVector<float>* yPositions = new TVector<float>(numDetectors);
-    TVector<float>* zPositions = new TVector<float>(numDetectors);
-    TVector<int>* detTypeVec = new TVector<int>(numDetectors);
+    // store the per detector info in a TTree
+    TTree* detTree = new TTree("detData", "Detector Data Tree");
+    int detNum, dBrdNum, dChnNum, mBrdNum, mChnNum, detType;
+    batchTree->Branch("detNum", &detNum,"detNum/I");
+    batchTree->Branch("digiBrdNum", &dBrdNum,"digiBrdNum/I");
+    batchTree->Branch("digiChanNum", &dChnNum,"digiChanNum/I");
+    batchTree->Branch("mpodBrdNum", &mBrdNum,"mpodBrdNum/I");
+    batchTree->Branch("mpodChanNum", &mChnNum,"mpodChanNum/I");
+    batchTree->Branch("detType", &detType,"detType/I");
+    float detXPos, detYPos, detZPos;
+    batchTree->Branch("xpos", &detXPos,"xpos/I");
+    batchTree->Branch("ypos", &detYPos,"ypos/I");
+    batchTree->Branch("zpos", &detZPos,"zpos/I");
     for(int i=0; i<numDetectors; ++i)
     {
-        detVec[i] = detData->detectorNum[i];
-        digiBrdVec[i] = detData->digiBoardNum[i];
-        digiChanVec[i] = detData->digiChanNum[i];
-        mpodBrdVec[i] = detData->mpodBoardNum[i];
-        mpodChanVec[i] = detData->mpodChanNum[i];
-        xPositions[i] = (detData->detXOffset[i] + confData->arrayXPos);
-        yPositions[i] = (detData->detYOffset[i] + confData->arrayYPos);
-        zPositions[i] = detData->detZOffset[i];
+        detNum = detData->detectorNum[i];
+        dBrdNum = detData->digiBoardNum[i];
+        dChnNum = detData->digiChanNum[i];
+        mBrdNum = detData->mpodBoardNum[i];
+        mChnNum = detData->mpodChanNum[i];
+        detXPos = (detData->detXOffset[i] + confData->arrayXPos);
+        detYPos = (detData->detYOffset[i] + confData->arrayYPos);
+        detZPos = detData->detZOffset[i];
         switch(detData->detType[i])
         {
         case InputParser::DetType::NaI:
-            detTypeVec[i] = 0;
+            detType = 0;
             break;
         case InputParser::DetType::LS:
-            detTypeVec[i] = 1;
+            detType = 1;
             break;
         case InputParser::DetType::HeMod:
-            detTypeVec[i] = 2;
+            detType = 2;
             break;
         case InputParser::DetType::HeUnmod:
-            detTypeVec[i] = 3;
+            detType = 3;
             break;
         case InputParser::DetType::CeBr3:
-            detTypeVec[i] = 4;
+            detType = 4;
             break;
         default:
-            detTypeVec[i] = 50;
+            detType = 50;
             break;
         }
+        detTree->Fill();
     }
-    detVec->Write("detNum");
-    digiBrdVec->Write("digiBrdNum");
-    digiChanVec->Write("digiChanNum");
-    mpodBrdVec->Write("mpodBrdNum");
-    mpodChanVec->Write("mpodChanNum");
-    xPositions->Write("detXPos");
-    yPositions->Write("detYPos");
-    zPositions->Write("detZPos");
-    detTypeVec->Write("detType");
+    detTree->Write();
     outfile->Flush();
-    delete detVec;
-    delete digiBrdVec;
-    delete digiChanVec;
-    delete mpodBrdVec;
-    delete mpodChanVec;
-    delete xPositions;
-    delete yPositions;
-    delete zPositions;
-    delete detTypeVec;
+    delete detTree;
     runNumber = 0;
     firstEvent = false;
     maxTimeEdge = (1.1f*confData->histIntegrationTime/0.001f);
@@ -327,10 +314,10 @@ void RootOutput::constructTimeSeriesSpectra()
 {
     int numRuns = runNumber + 1;
     //create the histogram arrays
-    TH2F* enProjTimeSeriesWithThresh = new TH2F*[numDetectors];
-    TH2F* psdProjTimeSeriesWithThresh = new TH2F*[numDetectors];
-    TH2F* enProjTimeSeriesWithoutThresh = new TH2F*[numDetectors];
-    TH2F* psdProjTimeSeriesWithoutThresh = new TH2F*[numDetectors];
+    TH2F** enProjTimeSeriesWithThresh = new TH2F*[numDetectors];
+    TH2F** psdProjTimeSeriesWithThresh = new TH2F*[numDetectors];
+    TH2F** enProjTimeSeriesWithoutThresh = new TH2F*[numDetectors];
+    TH2F** psdProjTimeSeriesWithoutThresh = new TH2F*[numDetectors];
     //create the histograms
     for(int i=0; i<numDetectors; ++i)
     {
@@ -363,16 +350,16 @@ void RootOutput::constructTimeSeriesSpectra()
             ostringstream hNamer;
             hNamer << "Det_" << detData->detectorNum[j] << "_Run_" << i << "_px_thresh";
             TH1D* enProjThresh = (TH1D*)outfile->Get(hNamer.str().c_str());
-            histNamer.str("");
-            histNamer.clear();
+            hNamer.str("");
+            hNamer.clear();
             hNamer << "Det_" << detData->detectorNum[j] << "_Run_" << i << "_px";
             TH1D* enProj = (TH1D*)outfile->Get(hNamer.str().c_str());
-            histNamer.str("");
-            histNamer.clear();
+            hNamer.str("");
+            hNamer.clear();
             hNamer << "Det_" << detData->detectorNum[j] << "_Run_" << i << "_py_thresh";
             TH1D* psdProjThresh = (TH1D*)outfile->Get(hNamer.str().c_str());
-            histNamer.str("");
-            histNamer.clear();
+            hNamer.str("");
+            hNamer.clear();
             hNamer << "Det_" << detData->detectorNum[j] << "_Run_" << i << "_py";
             TH1D* psdProj = (TH1D*)outfile->Get(hNamer.str().c_str());
             //iterate over energy channel number to fill that row in this time series histogram, divide by the run time to normalize things
