@@ -1,0 +1,61 @@
+/***************************************************************************//**
+********************************************************************************
+**
+** @file OrchidFileReader.h
+** @author James Till Matta
+** @date 03 Feb, 2017
+** @brief
+**
+** @copyright Copyright (C) 2016 James Till Matta
+**
+** This program is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+**
+** @details Holds the definition of the class which reads the ORCHID files
+**
+********************************************************************************
+*******************************************************************************/
+#ifndef ORCHIDREADER_SRC_INPUT_ORCHIDFILEREADER_H
+#define ORCHIDREADER_SRC_INPUT_ORCHIDFILEREADER_H
+// includes for C system headers
+// includes for C++ system headers
+#include<string>
+#include<vector>
+// includes from other libraries
+// includes from ORCHIDReader
+#include"Config/ConfigData.h"
+#include"Output/RootOutput.h"
+#include"Events/DppPsdIntegralEvent.h"
+#include"Events/InputFileSwapEvent.h"
+#include"Events/OrchidSlowControlsEvent.h"
+
+namespace Input 
+{
+
+class OrchidFileReader
+{
+public:
+    OrchidFileReader(InputParser::ConfigData* cData);
+    ~OrchidFileReader();
+    
+    void processFiles(Output::RootOutput* output);
+    
+private:
+    void readListFile();
+    void procFileHeader(std::string& title, int& rNum, int& sNum);
+    std::vector<std::string> fileList;
+    char* buffer;
+    InputParser::ConfigData* confData;
+    unsigned long long lastBufferEndTime=0;
+    int lastFileSeriesNumber=0;
+    int lastFileRunNumber=0;
+    std::string lastRunTitle;
+    
+    Events::DppPsdIntegralEvent dppEvent;
+    Events::InputFileSwapEvent fileEvent;
+    Events::OrchidSlowControlsEvent scEvent;
+};
+
+}
+#endif //ORCHIDREADER_SRC_INPUT_ORCHIDFILEREADER_H

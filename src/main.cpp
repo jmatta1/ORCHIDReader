@@ -25,7 +25,7 @@
 #include"Config/ParseFunctions.h"
 #include"Config/ConfigData.h"
 #include"Config/DetData.h"
-#include"Output/OutputSystem.h"
+#include"Output/RootOutput.h"
 
 int main(int argc, char* argv[])
 {
@@ -64,17 +64,16 @@ int main(int argc, char* argv[])
     
     //5) create the output system
     std::cout << "Creating base output system";
+    Output::RootOutput* rootOutputter= new Output::RootOutput(confData, detData);
     
-    //6) create the output classes and add them to the system
-    
-    //7) create the ORCHID data reader
+    //6) create the ORCHID data reader
 
-    //8) run the processing loop
+    //7) run the processing loop
     
-    //9) finalize the spectra
-    outSys->processingDone();
-    //10) clean up the output system
-    delete outSys;
+    //8) finalize the spectra
+    rootOutputter->done();
+    //8) clean up the output system
+    
     
     return 0;
 }
