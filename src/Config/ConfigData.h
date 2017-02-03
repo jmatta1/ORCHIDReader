@@ -32,23 +32,15 @@ namespace InputParser
 class ConfigData
 {
 public:
-    std::string overallDbTempPath = "";
-    std::string batchDbPath = "";
     std::string listFilePath = "";
     std::string rootFilePath = "";
-    std::string csvFilePath = "";
-    std::string logFilePath = "";
     std::string arrayDataPath = "";
     float histIntegrationTime = 0.0;
     float arrayXPos = 0.0;
     float arrayYPos = 0.0;
     
-    void overallDbTempPathSet(const std::string& input);
-    void batchDbPathSet(const std::string& input);
     void listFilePathSet(const std::string& input);
     void rootFilePathSet(const std::string& input);
-    void csvFilePathSet(const std::string& input);
-    void logFilePathSet(const std::string& input);
     void arrayDataPathSet(const std::string& input);
     void histIntegrationTimeSet(const float& input);
     void arrayXPosSet(const float& input);
@@ -61,12 +53,8 @@ public:
     friend std::ostream& operator<<(std::ostream& os, const ConfigData& gb);
     
 private:
-    bool overallDbTempPathSet_ = false;
-    bool batchDbPathSet_ = false;
     bool listFilePathSet_ = false;
     bool rootFilePathSet_ = false;
-    bool csvFilePathSet_ = false;
-    bool logFilePathSet_ = false;
     bool arrayDataPathSet_ = false;
     bool histIntegrationTimeSet_ = false;
     bool arrayXPosSet_ = false;

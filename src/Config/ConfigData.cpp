@@ -27,18 +27,6 @@
 namespace InputParser
 {
 
-void ConfigData::overallDbTempPathSet(const std::string& input)
-{
-    overallDbTempPath = input;
-    overallDbTempPathSet_ = true;
-}
-
-void ConfigData::batchDbPathSet(const std::string& input)
-{
-    batchDbPath = input;
-    batchDbPathSet_ = true;
-}
-
 void ConfigData::listFilePathSet(const std::string& input)
 {
     listFilePath = input;
@@ -49,21 +37,6 @@ void ConfigData::rootFilePathSet(const std::string& input)
 {
     rootFilePath = input;
     rootFilePathSet_ = true;
-}
-
-
-void ConfigData::csvFilePathSet(const std::string& input)
-{
-    csvFilePath = input;
-    csvFilePathSet_ = true;
-}
-
-
-
-void ConfigData::logFilePathSet(const std::string& input)
-{
-    logFilePath = input;
-    logFilePathSet_ = true;
 }
 
 void ConfigData::arrayDataPathSet(const std::string& input)
@@ -92,10 +65,9 @@ void ConfigData::arrayYPosSet(const float& input)
 
 bool ConfigData::validate()
 {
-    bool retValue =  overallDbTempPathSet_ | batchDbPathSet_ |
-                     listFilePathSet_ | histIntegrationTimeSet_ |
-                     logFilePathSet_ | arrayDataPathSet_ | arrayXPosSet_ |
-                     arrayYPosSet_ | rootFilePathSet_ | csvFilePathSet_;
+    bool retValue =  listFilePathSet_ | histIntegrationTimeSet_ |
+                     arrayDataPathSet_ | arrayXPosSet_ | arrayYPosSet_ |
+                     rootFilePathSet_;
     
     if(histIntegrationTime <= 1.0)
     {
@@ -106,25 +78,9 @@ bool ConfigData::validate()
 
 void ConfigData::printValidationErrors()
 {
-    if(!overallDbTempPathSet_)
-    {
-        std::cout<<"    OverallDataTempPath must be set"<<std::endl;
-    }
-    if(!batchDbPathSet_)
-    {
-        std::cout<<"    BatchDbPath must be set"<<std::endl;
-    }
-    if(!logFilePathSet_)
-    {
-        std::cout<<"    LogFilePath must be set"<<std::endl;
-    }
     if(!rootFilePathSet_)
     {
         std::cout<<"    RootFilePath must be set"<<std::endl;
-    }
-    if(!csvFilePathSet_)
-    {
-        std::cout<<"    CsvFilePath must be set"<<std::endl;
     }
     if(!listFilePathSet_)
     {
@@ -156,11 +112,7 @@ void ConfigData::printValidationErrors()
 std::ostream& operator<<(std::ostream& os, const ConfigData& cd) 
 {
 return os << "[StartConfig]\n"
-    << "    OverallDataTempPath = "   << cd.overallDbTempPath   << "\n"
-    << "    BatchDbPath         = "   << cd.batchDbPath         << "\n"
     << "    RootFilePath        = "   << cd.rootFilePath        << "\n"
-    << "    CsvFilePath         = "   << cd.csvFilePath         << "\n"
-    << "    LogFilePath         = "   << cd.logFilePath         << "\n"
     << "    ListFilePath        = "   << cd.listFilePath        << "\n"
     << "    ArrayDataPath       = "   << cd.arrayDataPath       << "\n"
     << "    ArrayXPosition      = "   << cd.arrayXPos           << "\n"
