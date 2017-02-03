@@ -30,7 +30,7 @@ class InputFileSwapEvent
 {
 public:
     unsigned long long oldFileLastBufferTime;
-    unsigned long long newFileHeaderTime;
+    unsigned long long newFileFirstBufferTime;
     bool sameRun;
 };
 
