@@ -14,13 +14,13 @@ project (OrchidReader)
 #               @ONLY)
 
 # force the existence of the BOOST library package
-find_package(Boost COMPONENTS thread log log_setup filesystem date_time REQUIRED)
+# find_package(Boost COMPONENTS thread log log_setup filesystem date_time REQUIRED)
 # find the threading stuff, because we need it for the log
 find_package(Threads REQUIRED)
 # find ROOT stuff
 find_package(ROOT COMPONENTS Core RIO Hist Tree REQUIRED)
 
-MESSAGE( STATUS "Root Library List:    " ${ROOT_LIBRARIES})
+# MESSAGE( STATUS "Root Library List:    " ${ROOT_LIBRARIES})
 
 # Add the generated file header directory in this way to allow files in the
 # utility directory to access the generated file as if it was
@@ -71,6 +71,6 @@ include_directories(".")
 add_executable(orchidReader ${SRCS} ${HDRS})
 
 # make sure that the system knows to link the boost libraries
-target_link_libraries(orchidReader ${Boost_LIBRARIES})
+# target_link_libraries(orchidReader ${Boost_LIBRARIES})
 target_link_libraries(orchidReader ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(orchidReader ${ROOT_LIBRARIES})

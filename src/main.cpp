@@ -21,17 +21,10 @@
 #include<iostream>
 #include<string>
 // includes from other libraries
-#define BOOST_LOG_DYN_LINK 1
-#include<boost/log/utility/setup.hpp>
-#include<boost/log/utility/setup/file.hpp>
-#include<boost/log/sinks/text_file_backend.hpp>
-#include<boost/log/utility/setup/common_attributes.hpp>
-#include<boost/core/null_deleter.hpp>
 // includes from ORCHIDReader
 #include"Config/ParseFunctions.h"
 #include"Config/ConfigData.h"
 #include"Config/DetData.h"
-#include"Utility/OrchidReaderLogger.h"
 #include"Output/OutputSystem.h"
 
 int main(int argc, char* argv[])
@@ -64,42 +57,23 @@ int main(int argc, char* argv[])
     }
     //3) Calculate the board and channel to detector number mappings
     detData.calculateMappings();
-    //4) initialize the logging file
-    std::cout<<"Logging Start\n\n"<<std::endl;
-    boost::log::register_simple_formatter_factory< LogSeverity, char >("Severity");
-    boost::log::add_common_attributes();
-    typedef boost::log::sinks::synchronous_sink<boost::log::sinks::text_file_backend> FileSink;
-    boost::shared_ptr<FileSink> fileSink = boost::log::add_file_log(
-                                               boost::log::keywords::file_name = confData.logFilePath,
-                                               boost::log::keywords::auto_flush = true,
-                                               boost::log::keywords::format = "[%TimeStamp%] <%Severity%>: %Message%");  //give messages a time and severity
-    boost::log::core::get()->add_sink(fileSink);
-    
-    //set up to dump to the console as well
-    boost::shared_ptr<std::ostream> coutStream(&std::cout, boost::null_deleter());
-    typedef boost::log::sinks::synchronous_sink<boost::log::sinks::text_ostream_backend> text_sink;
-    boost::shared_ptr<text_sink> coutSink = boost::make_shared<text_sink>();
-    coutSink->locked_backend()->add_stream(coutStream);
-    boost::log::core::get()->add_sink(coutSink);
-    
-    LoggerType& lg = Logger::get();
-    //5) show the user what data we read in
-    BOOST_LOG_SEV(lg, Information) << "The configuration data read in is: \n" << confData << "\n";
-    BOOST_LOG_SEV(lg, Information) << "The detector data read in is: \n" << detData << "\n";
-    
-    //6) create the output system
-    BOOST_LOG_SEV(lg, Information) << "Creating base output system";
-    Output::OutputSystem* outSys = new Output::OutputSystem;
-    
-    //7) create the output classes and add them to the system
-    
-    //8) create the ORCHID data reader
 
-    //9) run the processing loop
+    //4) show the user what data we read in
+    std::cout << "The configuration data read in is: \n" << confData << "\n";
+    std::cout << "The detector data read in is: \n" << detData << "\n";
     
-    //10) finalize the spectra
+    //5) create the output system
+    std::cout << "Creating base output system";
+    
+    //6) create the output classes and add them to the system
+    
+    //7) create the ORCHID data reader
+
+    //8) run the processing loop
+    
+    //9) finalize the spectra
     outSys->processingDone();
-    //11) clean up the output system
+    //10) clean up the output system
     delete outSys;
     
     return 0;
