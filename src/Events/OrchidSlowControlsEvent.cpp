@@ -69,6 +69,7 @@ int OrchidSlowControlsEvent::readEvent(char* buffer, unsigned long long approxim
         channelStatus[i].loadFromValue(getData<int>(buffer, ind));
         ind += 4;
     }
+    return binarySize;
 }
 
 }
