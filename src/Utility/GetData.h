@@ -17,11 +17,8 @@
 **
 ********************************************************************************
 *******************************************************************************/
-#ifndef ORCHIDREADER_SRC_EVENTS_GETDATA_H
-#define ORCHIDREADER_SRC_EVENTS_GETDATA_H
-
-namespace Events
-{
+#ifndef ORCHIDREADER_SRC_UTILITY_GETDATA_H
+#define ORCHIDREADER_SRC_UTILITY_GETDATA_H
 
 template<class Type>
 Type getData(char* buffer, int index)
@@ -29,5 +26,4 @@ Type getData(char* buffer, int index)
     return *(reinterpret_cast<Type*>(buffer+index));
 }
 
-}
-#endif //ORCHIDREADER_SRC_EVENTS_GETDATA_H
+#endif //ORCHIDREADER_SRC_UTILITY_GETDATA_H

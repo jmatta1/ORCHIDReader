@@ -22,7 +22,7 @@
 // includes for C++ system headers
 // includes from other libraries
 // includes from ORCHIDReader
-#include"GetData.h"
+#include"Utility/GetData.h"
 
 namespace Events
 {
