@@ -1,7 +1,7 @@
 /***************************************************************************//**
 ********************************************************************************
 **
-** @file DppPsdIntegralEvent.h
+** @file GetData.h
 ** @author James Till Matta
 ** @date 31 Jan, 2017
 ** @brief
@@ -12,8 +12,7 @@
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 **
-** @details Holds the definition of the class for DPP-PSD events without
-** waveforms
+** @details Holds a template convenience function for getting binary data
 **
 ********************************************************************************
 *******************************************************************************/
