@@ -33,6 +33,34 @@
 namespace Input 
 {
 
+struct BufferHeaderData
+{
+public:
+    unsigned int eventCount;
+    unsigned int bufferNumber;
+    unsigned long long bufferStartTime;
+    unsigned long long bufferStopTime;
+    
+    BufferHeaderData& operator=(const BufferHeaderData& rhs);
+    int readFromBuffer(char* buffer);
+};
+
+struct FileHeaderData
+{
+public:
+    unsigned short orchidMajorVer;
+    unsigned short orchidMinorVer;
+    unsigned short orchidPatchVer;
+    unsigned long long fileStartTime;
+    std::string fileStartTimeString;
+    std::string runTitle;
+    unsigned long runNumber;
+    unsigned long sequenceNumber;
+    
+    FileHeaderData& operator=(const FileHeaderData& rhs);
+    void readFromBuffer(char* buffer);
+};
+
 class OrchidFileReader
 {
 public:
@@ -43,14 +71,14 @@ public:
     
 private:
     void readListFile();
-    void procFileHeader(std::string& title, int& rNum, int& sNum);
+    void processDataBuffer(Output::RootOutput* output, int startInd);
+    
     std::vector<std::string> fileList;
     char* buffer;
     InputParser::ConfigData* confData;
-    unsigned long long lastBufferEndTime=0;
-    int lastFileSeriesNumber=0;
-    int lastFileRunNumber=0;
-    std::string lastRunTitle;
+    BufferHeaderData currBufferData;
+    FileHeaderData currFileData;
+    unsigned long long currentFileSize;
     
     Events::DppPsdIntegralEvent dppEvent;
     Events::InputFileSwapEvent fileEvent;
