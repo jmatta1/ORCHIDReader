@@ -18,6 +18,7 @@ project (OrchidReader)
 # find the threading stuff, because we need it for the log
 # find_package(Threads REQUIRED)
 # find ROOT stuff
+find_package(Boost REQUIRED)
 list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
 find_package(ROOT COMPONENTS Core RIO Hist Tree REQUIRED)
 
@@ -36,7 +37,7 @@ include(./CMakeFlagDefs.txt)
 
 # add our default g++ flags
 #add_definitions(-m64 -std=c++14 -D_FILE_OFFSET_BITS=64 -lpthread -I/usr/local/include/root)
-add_definitions(-m64 -std=c++14 -D_FILE_OFFSET_BITS=64 -I/usr/local/include/root)
+add_definitions(-m64 -std=c++11 -D_FILE_OFFSET_BITS=64 -I/usr/local/include/root)
 
 # a little hack to make Qt Creator a little happier when it runs cmake to get
 # the project files
