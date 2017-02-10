@@ -26,6 +26,7 @@
 #include"Config/ConfigData.h"
 #include"Config/DetData.h"
 #include"Output/RootOutput.h"
+#include"Input/OrchidFileReader.h"
 
 int main(int argc, char* argv[])
 {
@@ -64,16 +65,19 @@ int main(int argc, char* argv[])
     
     //5) create the output system
     std::cout << "Creating base output system";
-    Output::RootOutput* rootOutputter= new Output::RootOutput(confData, detData);
+    Output::RootOutput* rootOutputter= new Output::RootOutput(&confData, &detData);
     
     //6) create the ORCHID data reader
+    Input::OrchidFileReader* orchidReader = new Input::OrchidFileReader(&confData);
 
     //7) run the processing loop
+    orchidReader->processFiles(rootOutputter);
     
     //8) finalize the spectra
     rootOutputter->done();
-    //8) clean up the output system
-    
+    //8) clean up objects
+    delete orchidReader;
+    delete rootOutputter;
     
     return 0;
 }
