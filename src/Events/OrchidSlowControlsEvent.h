@@ -30,6 +30,8 @@ namespace Events
 class OrchidSlowControlsEvent
 {
 public:
+    OrchidSlowControlsEvent(int numChan);
+    ~OrchidSlowControlsEvent();
     int readEvent(char* buffer, unsigned long long approximateTime);
     unsigned long long appxTime;
     short numVoltageChannels = 0;

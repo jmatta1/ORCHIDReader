@@ -26,6 +26,44 @@
 namespace Events
 {
 
+OrchidSlowControlsEvent::OrchidSlowControlsEvent(int numChan)
+{
+    boardNumber = new int[numChan];
+    channelNumber = new int[numChan];
+    terminalVoltage = new float[numChan];
+    senseVoltage = new float[numChan];
+    setVoltage = new float[numChan];
+    current = new float[numChan];
+    rampUpRate = new float[numChan];
+    rampDownRate = new float[numChan];
+    maxCurrent = new float[numChan];
+    maxVoltage = new float[numChan];
+    currentTripTime = new int[numChan];
+    temperature = new int[numChan];
+    maxTemperature = new int[numChan];
+    outputSwitch = new bool[numChan];
+    channelStatus = new ChannelStatus[numChan];
+}
+
+OrchidSlowControlsEvent::~OrchidSlowControlsEvent()
+{
+    delete[] boardNumber;
+    delete[] channelNumber;
+    delete[] terminalVoltage;
+    delete[] senseVoltage;
+    delete[] setVoltage;
+    delete[] current;
+    delete[] rampUpRate;
+    delete[] rampDownRate;
+    delete[] maxCurrent;
+    delete[] maxVoltage;
+    delete[] currentTripTime;
+    delete[] temperature;
+    delete[] maxTemperature;
+    delete[] outputSwitch;
+    delete[] channelStatus;
+}
+
 int OrchidSlowControlsEvent::readEvent(char* buffer, unsigned long long approximateTime)
 {
     appxTime = approximateTime;
