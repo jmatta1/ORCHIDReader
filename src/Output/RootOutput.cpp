@@ -68,8 +68,10 @@ void BatchTreeData::setAverages(int numEntries)
 }
 
 RootOutput::RootOutput(InputParser::ConfigData* cData, InputParser::DetData* dData):
-    confData(cData), detData(dData), treeData(detData->detectorNum.size())
+    confData(cData), detData(dData), treeData(dData->detectorNum.size())
 {
+    //create the file
+    outfile = new TFile(cData->rootFilePath.c_str(),"RECREATE");
     //set up the first level of arrays
     numDetectors = detData->detectorNum.size();
     detRun2DHists = new TH2F*[numDetectors];
@@ -83,8 +85,6 @@ RootOutput::RootOutput(InputParser::ConfigData* cData, InputParser::DetData* dDa
     enProjWithoutCutoffSum = new TH1D*[numDetectors];
     psdProjWithCutoffSum = new TH1D*[numDetectors];
     psdProjWithoutCutoffSum = new TH1D*[numDetectors];
-    //create the file
-    outfile = new TFile(cData->rootFilePath.c_str(),"RECREATE");
     //prepare the root tree
     this->prepTree();
     //write constants for the batch out to the file
@@ -219,6 +219,7 @@ void RootOutput::dppPsdIntegralEvent(const Events::DppPsdIntegralEvent& event)
         firstEvent = false;
         runStartEpoch = event.appxTime;
         runEndEpochTarget = runStartEpoch + histIntTimeUs;
+        std::cout << runEndEpochTarget << std::endl;
     }
     //handle the first event of the detector in question
     if(firstDetEvent[detInd])

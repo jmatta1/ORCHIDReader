@@ -110,7 +110,8 @@ void FileHeaderData::readFromBuffer(char* buffer)
     //at the very end of the file header buffer
 }
 
-OrchidFileReader::OrchidFileReader(InputParser::ConfigData* cData):confData(cData)
+OrchidFileReader::OrchidFileReader(InputParser::ConfigData* cData, int numDet):
+    confData(cData), scEvent(numDet)
 {
     //allocate the file read buffer to be 50% bigger than a buffer in the file
     buffer = new char[3*1024*1024];
@@ -217,16 +218,19 @@ void OrchidFileReader::processDataBuffer(Output::RootOutput* output, int startIn
     int bInd = startInd;
     unsigned long long aprxTime;
     int eventCount = 0;
+    unsigned long long timeDiff = currBufferData.bufferStopTime-currBufferData.bufferStartTime;
     while(bInd < BufferSize)
     {
         if(buffer[bInd] == 15 && buffer[bInd+1] == 2)
         {//DPP PSD event
+            aprxTime = ((timeDiff*eventCount/currBufferData.eventCount)+currBufferData.bufferStartTime);
             bInd += dppEvent.readEvent(buffer + bInd, aprxTime);
             output->dppPsdIntegralEvent(dppEvent);
             eventCount += 1;
         }
         else if(buffer[bInd] != 0 && buffer[bInd+2] == 1 && buffer[bInd+3] == 0) // the 2 0 check makes sure a 2 byte value of 2 is written
         {//slow controls event
+            aprxTime = ((timeDiff*eventCount/currBufferData.eventCount)+currBufferData.bufferStartTime);
             bInd += scEvent.readEvent(buffer + bInd, aprxTime);
             output->slowControlsEvent(scEvent);
             eventCount += 1;

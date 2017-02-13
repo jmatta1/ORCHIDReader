@@ -113,7 +113,7 @@ private:
     unsigned long long lastTimeStamp[32];
     int runNumber = -1;
     int numSlowCtrls;
-    bool firstEvent = false;
+    bool firstEvent = true;
     int numTimeBin;
     float maxTimeEdge;
     //config data

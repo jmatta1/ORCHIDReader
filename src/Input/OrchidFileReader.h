@@ -64,7 +64,7 @@ public:
 class OrchidFileReader
 {
 public:
-    OrchidFileReader(InputParser::ConfigData* cData);
+    OrchidFileReader(InputParser::ConfigData* cData, int numDet);
     ~OrchidFileReader();
     
     void processFiles(Output::RootOutput* output);
