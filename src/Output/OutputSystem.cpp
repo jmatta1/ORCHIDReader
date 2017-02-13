@@ -27,6 +27,28 @@
 namespace Output
 {
 
+RunData::RunData(int numDet):numDetectors(numDet)
+{
+    detNum = new int[numDetectors];
+    roughCorrection = new float[numDetectors];
+    avgChanVolt = new float[numDetectors];
+    avgChanCurrent = new float[numDetectors];
+    avgHVChanTemp = new int[numDetectors];
+    rawCounts = new unsigned long long[numDetectors];
+    rawRates = new double[numDetectors];
+}
+
+RunData::~RunData()
+{
+    delete[] detNum;
+    delete[] roughCorrection;
+    delete[] avgChanVolt;
+    delete[] avgChanCurrent;
+    delete[] avgHVChanTemp;
+    delete[] rawCounts;
+    delete[] rawRates;
+}
+
 void OutputSystem::addOutputClass(std::unique_ptr<OutputInterface>&& outputter)
 {
     outputs.push_back(std::forward<std::unique_ptr<OutputInterface>>(outputter));

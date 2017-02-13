@@ -27,16 +27,40 @@
 // includes from other libraries
 // includes from ORCHIDReader
 #include"OutputInterface.h"
+#include"Config/ConfigData.h"
+#include"Config/DetData.h"
 #include"Events/OrchidSlowControlsEvent.h"
 #include"Events/DppPsdIntegralEvent.h"
+#include"Events/InputFileSwapEvent.h"
 
 namespace Output
 {
 
+struct RunData
+{
+    RunData(int numDet);
+    ~RunData();
+    void resetCounters();
+    
+    int runNumber;
+    unsigned long long startTime;
+    unsigned long long stopTime;
+    unsigned long long centerTime;
+    double runTime;
+    int numDetectors;
+    float* roughCorrection;
+    int* detNum;
+    float* avgChanVolt;
+    float* avgChanCurrent;
+    float* avgHVChanTemp;
+    unsigned long long* rawCounts;
+    double* rawRates;
+};
+
 class OutputSystem
 {
 public:
-    
+    OutputSystem(InputParser::ConfigData* cData, InputParser::DetData* dData);
     //used in initial setup and finish
     void addOutputClass(std::unique_ptr<OutputInterface>&& outputter);
     void processingDone();
@@ -44,9 +68,12 @@ public:
     //for use by the output system
     void passSlowControlsEvent(const Events::OrchidSlowControlsEvent& event);
     void passDppPsdIntegralEvent(const Events::DppPsdIntegralEvent& event);
+    void passFileSwapEvent(const Events::InputFileSwapEvent& event);
     
 private:
     std::vector<std::unique_ptr<OutputInterface> > outputs;
+    bool firstEvent=true;
+    
 };
 
 }
