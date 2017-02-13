@@ -34,9 +34,14 @@ class OutputInterface
 public:
     virtual ~OutputInterface(){}
     
+    // processing for individual events
     virtual void slowControlsEvent(const Events::OrchidSlowControlsEvent& event) = 0;
     virtual void dppPsdIntegralEvent(const Events::DppPsdIntegralEvent& event) = 0;
     virtual void inputFileSwitch(const Events::InputFileSwapEvent& event) = 0;
+    
+    //larger scale processing
+    virtual void newRun(int runNum, unsigned long long startTime) = 0;
+    virtual void endRun() = 0;
     virtual void done() = 0;
 };
 
