@@ -64,11 +64,11 @@ int main(int argc, char* argv[])
     std::cout << "The detector data read in is: \n" << detData << "\n";
     
     //5) create the output system
-    std::cout << "Creating base output system";
+    std::cout << "Creating base output system"<<std::endl;
     Output::RootOutput* rootOutputter= new Output::RootOutput(&confData, &detData);
     
     //6) create the ORCHID data reader
-    Input::OrchidFileReader* orchidReader = new Input::OrchidFileReader(&confData);
+    Input::OrchidFileReader* orchidReader = new Input::OrchidFileReader(&confData, detData.detectorNum.size());
 
     //7) run the processing loop
     orchidReader->processFiles(rootOutputter);
