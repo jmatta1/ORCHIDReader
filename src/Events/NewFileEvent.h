@@ -1,7 +1,7 @@
 /***************************************************************************//**
 ********************************************************************************
 **
-** @file InputFileSwapEvent.h
+** @file NewFileEvent.h
 ** @author James Till Matta
 ** @date 02 Feb, 2017
 ** @brief
@@ -16,8 +16,8 @@
 **
 ********************************************************************************
 *******************************************************************************/
-#ifndef ORCHIDREADER_SRC_EVENTS_INPUTFILESWAPEVENT_H
-#define ORCHIDREADER_SRC_EVENTS_INPUTFILESWAPEVENT_H
+#ifndef ORCHIDREADER_SRC_EVENTS_NEWFILEEVENT_H
+#define ORCHIDREADER_SRC_EVENTS_NEWFILEEVENT_H
 // includes for C system headers
 // includes for C++ system headers
 // includes from other libraries
@@ -26,14 +26,16 @@
 namespace Events
 {
 
-class InputFileSwapEvent
+class NewFileEvent
 {
 public:
-    unsigned long long oldFileLastBufferTime;
-    unsigned long long newFileFirstBufferTime;
+    unsigned long long previousFileLastBufferEndTime;
+    unsigned long long newFileHeaderTime;
+    unsigned long long newFileFirstBufferStartTime;
+    bool firstFile;
     bool sameRun;
 };
 
 }
 
-#endif //ORCHIDREADER_SRC_EVENTS_INPUTFILESWAPEVENT_H
+#endif //ORCHIDREADER_SRC_EVENTS_NEWFILEEVENT_H

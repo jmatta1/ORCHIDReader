@@ -72,7 +72,7 @@ int OrchidSlowControlsEvent::readEvent(char* buffer, unsigned long long approxim
     short binarySize = getData<short>(buffer, ind);
     ind += 2;
     //the next byte is the event type, skip it
-    ind += 1;
+    ind += 2;
     //the next 4 bytes are the number of voltage channels
     numVoltageChannels = getData<int>(buffer, ind);
     ind += 4;
