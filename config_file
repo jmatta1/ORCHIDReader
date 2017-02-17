@@ -1,12 +1,12 @@
 [StartConfig]
 # this is the path to the file that will hold all the root histograms and base run data
-RootFilePath="./Batch_TestRun.root"
+RootFilePath="./New_RxOff.root"
 
 # Below here is input to the program
 
 # this is the path to the file that contains the list of paths of raw input
 # files to be parsed for this batch
-ListFilePath="./Test_ListFile.txt"
+ListFilePath="./list_New_RxOff.txt"
 
 # this is the file that contains information about the array configuration
 # and detector setup
