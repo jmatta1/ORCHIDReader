@@ -26,54 +26,46 @@
 #include<memory>
 // includes from other libraries
 // includes from ORCHIDReader
-#include"OutputInterface.h"
+#include"Output/OutputInterface.h"
+#include"Output/RunData.h"
 #include"Config/ConfigData.h"
 #include"Config/DetData.h"
 #include"Events/OrchidSlowControlsEvent.h"
 #include"Events/DppPsdIntegralEvent.h"
-#include"Events/InputFileSwapEvent.h"
+#include"Events/NewFileEvent.h"
 
 namespace Output
 {
-
-struct RunData
-{
-    RunData(int numDet);
-    ~RunData();
-    void resetCounters();
-    
-    int runNumber;
-    unsigned long long startTime;
-    unsigned long long stopTime;
-    unsigned long long centerTime;
-    double runTime;
-    int numDetectors;
-    float* roughCorrection;
-    int* detNum;
-    float* avgChanVolt;
-    float* avgChanCurrent;
-    float* avgHVChanTemp;
-    unsigned long long* rawCounts;
-    double* rawRates;
-};
 
 class OutputSystem
 {
 public:
     OutputSystem(InputParser::ConfigData* cData, InputParser::DetData* dData);
     //used in initial setup and finish
-    void addOutputClass(std::unique_ptr<OutputInterface>&& outputter);
+    void addOutputClass(std::unique_ptr<OutputInterface>&& outputter)
+    {outputs.push_back(std::forward<std::unique_ptr<OutputInterface>>(outputter));}
+    
     void processingDone();
     
     //for use by the output system
-    void passSlowControlsEvent(const Events::OrchidSlowControlsEvent& event);
-    void passDppPsdIntegralEvent(const Events::DppPsdIntegralEvent& event);
-    void passFileSwapEvent(const Events::InputFileSwapEvent& event);
+    void newFileEvent(Events::NewFileEvent& event);
+    void slowControlsEvent(Events::OrchidSlowControlsEvent& event);
+    void dppPsdIntegralEvent(Events::DppPsdIntegralEvent& event);
     
 private:
-    std::vector<std::unique_ptr<OutputInterface> > outputs;
-    bool firstEvent=true;
+    void assignRunTargetEnd(unsigned long long start);
     
+    std::vector<std::unique_ptr<OutputInterface> > outputs;
+    InputParser::ConfigData* confData;
+    InputParser::DetData* detData;
+    RunData runData;
+    bool firstEvent=true;
+    bool primeRollOverStage2 = false;
+    unsigned long long currRollOverOffset = 0ULL;
+    unsigned long long lastRollOverOffset = 0ULL;
+    unsigned long long targetRunEndTime = 0ULL;
+    unsigned long long lastEventTime = 0ULL;
+    unsigned int slowControlsCount=0;
 };
 
 }
