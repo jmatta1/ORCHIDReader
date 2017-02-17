@@ -20,6 +20,7 @@
 // includes for C++ system headers
 #include<iostream>
 #include<string>
+#include<memory>
 // includes from other libraries
 // includes from ORCHIDReader
 #include"Config/ParseFunctions.h"
@@ -41,43 +42,49 @@ int main(int argc, char* argv[])
     //2) read in the configuration files
     std::cout<<"\n";
     std::string configFileName(argv[1]);
-    InputParser::ConfigData confData;
+    InputParser::ConfigData* confData = new InputParser::ConfigData;
 
-    bool configParseGood = InputParser::parseValAndPrintConfigFile(&confData, configFileName, std::cout);
+    bool configParseGood = InputParser::parseValAndPrintConfigFile(confData, configFileName, std::cout);
     if(!configParseGood)
     {
         std::cout<<"Failed in config reading\n"<<std::endl;
         return 1;
     }
-    InputParser::DetData detData;
-    bool detDataParseGood = InputParser::parseValAndPrintDetDataFile(&detData, confData.arrayDataPath, std::cout);
+    InputParser::DetData* detData = new InputParser::DetData;
+    bool detDataParseGood = InputParser::parseValAndPrintDetDataFile(detData, confData->arrayDataPath, std::cout);
     if(!detDataParseGood)
     {
         std::cout<<"Failed in detector data reading\n"<<std::endl;
         return 1;
     }
     //3) Calculate the board and channel to detector number mappings
-    detData.calculateMappings();
+    detData->calculateMappings();
 
     //4) show the user what data we read in
-    std::cout << "The configuration data read in is: \n" << confData << "\n";
-    std::cout << "The detector data read in is: \n" << detData << "\n";
+    std::cout << "The configuration data read in is: \n" << *confData << "\n";
+    std::cout << "The detector data read in is: \n" << *detData << "\n";
     
     //5) create the output system
     std::cout << "Creating base output system"<<std::endl;
-    Output::RootOutput* rootOutputter= new Output::RootOutput(&confData, &detData);
+    Output::OutputSystem* output = new Output::OutputSystem(confData, detData);
+    //Output::RootOutput* rootOutputter= new Output::RootOutput(&confData, &detData);
+    std::unique_ptr<Output::OutputInterface> rootOutput(new Output::RootOutput(confData, detData));
+    
+    output->addOutputClass(std::move(rootOutput));
     
     //6) create the ORCHID data reader
-    Input::OrchidFileReader* orchidReader = new Input::OrchidFileReader(&confData, detData.detectorNum.size());
+    Input::OrchidFileReader* orchidReader = new Input::OrchidFileReader(confData, detData->detectorNum.size());
 
     //7) run the processing loop
-    orchidReader->processFiles(rootOutputter);
+    orchidReader->processFiles(output);
     
     //8) finalize the spectra
-    rootOutputter->done();
+    output->processingDone();
     //8) clean up objects
     delete orchidReader;
-    delete rootOutputter;
+    delete output;
+    delete detData;
+    delete confData;
     
     return 0;
 }
