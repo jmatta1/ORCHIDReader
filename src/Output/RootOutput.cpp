@@ -28,44 +28,9 @@ namespace Output
 
 using std::ostringstream;
 static const int NumEnChannels = 8192;
+static const int EnPerBin = 65536/8192;
 static const int NumPsdChannels = 1024;
-
-void BatchTreeData::clearData()
-{
-    runNumber = 0;
-    startTime = 0;
-    stopTime = 0;
-    centerTime = 0;
-    runTime = 0.0;
-    numDetectors = 0;
-    for(int i=0; i<32; ++i)
-    {
-        rawCounts[i] = 0;
-        rawRates[i] = 0.0;
-        avgChanVolt[i] = 0.0;
-        avgChanCurrent[i] = 0.0;
-        avgHVChanTemp[i] = 0.0;
-    }
-}
-
-void BatchTreeData::setRates()
-{
-    for(int i=0; i<32; ++i)
-    {
-        rawRates[i] = static_cast<double>(rawCounts[i])/runTime;
-    }
-}
-
-void BatchTreeData::setAverages(int numEntries)
-{
-    float entries = static_cast<float>(numEntries);
-    for(int i=0; i<32; ++i)
-    {
-        avgChanVolt[i] /= entries;
-        avgChanCurrent[i] /= entries;
-        avgHVChanTemp[i] /= entries;
-    }
-}
+static const double PsdPerBin = 1.0f/1024.0f;
 
 RootOutput::RootOutput(InputParser::ConfigData* cData, InputParser::DetData* dData):
     confData(cData), detData(dData), treeData(dData->detectorNum.size())
@@ -85,6 +50,21 @@ RootOutput::RootOutput(InputParser::ConfigData* cData, InputParser::DetData* dDa
     enProjWithoutCutoffSum = new TH1D*[numDetectors];
     psdProjWithCutoffSum = new TH1D*[numDetectors];
     psdProjWithoutCutoffSum = new TH1D*[numDetectors];
+    for(int i=0; i<numDetectors; ++i)
+    {
+        detRun2DHists[i] = nullptr;
+        detSum2DHists[i] = nullptr;
+        enProjWithCutoff[i] = nullptr;
+        enProjWithoutCutoff[i] = nullptr;
+        psdProjWithCutoff[i] = nullptr;
+        psdProjWithoutCutoff[i] = nullptr;
+        eventTimeHists[i] = nullptr;
+        enProjWithCutoffSum[i] = nullptr;
+        enProjWithoutCutoffSum[i] = nullptr;
+        psdProjWithCutoffSum[i] = nullptr;
+        psdProjWithoutCutoffSum[i] = nullptr;
+    }
+    this->initSums();
     //prepare the root tree
     this->prepTree();
     //write constants for the batch out to the file
@@ -147,17 +127,73 @@ RootOutput::RootOutput(InputParser::ConfigData* cData, InputParser::DetData* dDa
     detTree->Write();
     outfile->Flush();
     delete detTree;
-    runNumber = 0;
-    firstEvent = false;
     maxTimeEdge = (1.1f*confData->histIntegrationTime/0.001f);
     numTimeBin = static_cast<int>(maxTimeEdge/100.0f);
-    histIntTimeUs = static_cast<unsigned long long>(1000000*confData->histIntegrationTime);
-    for(int i=0; i<32; ++i)
+    runStartTimeStamp = 0;
+    lastTimeStamp = 0;
+    firstDetEventOfRun = true;
+}
+
+void RootOutput::initSums()
+{
+    for(int i=0; i<numDetectors; ++i)
     {
-        firstDetEvent[i] = true;
-        runStartTimeStamp[i] = 0;
-        lastTimeStamp[i] = 0;
+        ostringstream histNamer;
+        histNamer << "Det_" << detData->detectorNum[i] << "_Sum_2D";
+        detSum2DHists[i] = new TH2F(histNamer.str().c_str(),"PSD Vs lGate Batch Sum",NumEnChannels,0,65536,NumPsdChannels,0.0,1.0);
+        histNamer.str("");
+        histNamer.clear();
+        histNamer << "Det_" << detData->detectorNum[i] << "_Sum_px_thresh";
+        enProjWithCutoffSum[i] = new TH1D(histNamer.str().c_str(),"lGate Projection With Cutoff Batch Sum",NumEnChannels,0,65536);
+        histNamer.str("");
+        histNamer.clear();
+        histNamer << "Det_" << detData->detectorNum[i] << "_Sum_px";
+        enProjWithoutCutoffSum[i] = new TH1D(histNamer.str().c_str(),"lGate Projection Batch Sum",NumEnChannels,0,65536);
+        histNamer.str("");
+        histNamer.clear();
+        histNamer << "Det_" << detData->detectorNum[i] << "_Sum_py_thresh";
+        psdProjWithCutoffSum[i] = new TH1D(histNamer.str().c_str(),"PSD Projection With Cutoff Batch Sum",NumPsdChannels,0.0,1.0);
+        histNamer.str("");
+        histNamer.clear();
+        histNamer << "Det_" << detData->detectorNum[i] << "_Sum_py";
+        psdProjWithoutCutoffSum[i] = new TH1D(histNamer.str().c_str(),"PSD Projection Batch Sum",NumPsdChannels,0.0,1.0);
     }
+}
+
+void RootOutput::prepTree()
+{
+    //create the tree
+    batchTree = new TTree("BatchTree","Per Run Data");
+    //now create the scalar branches
+    batchTree->Branch("runN", &treeData.runNumber,"runN/I");
+    batchTree->Branch("startT", &treeData.startTime,"startT/l");
+    batchTree->Branch("stopT", &treeData.stopTime,"stopT/l");
+    batchTree->Branch("centerT", &treeData.centerTime,"centerT/l");
+    batchTree->Branch("runT", &treeData.runTime,"runT/D");
+    //now create the vector branches
+    std::ostringstream leafNamer;
+    leafNamer << "roughDtCorr["<<numDetectors<<"]/F";
+    batchTree->Branch("roughDtCorr", treeData.roughCorrection, leafNamer.str().c_str());
+    leafNamer.str("");
+    leafNamer.clear();
+    leafNamer << "avgChanVolt["<<numDetectors<<"]/F";
+    batchTree->Branch("avgChanVolt", treeData.avgChanVolt, leafNamer.str().c_str());
+    leafNamer.str("");
+    leafNamer.clear();
+    leafNamer << "avgChanCurr["<<numDetectors<<"]/F";
+    batchTree->Branch("avgChanCurr", treeData.avgChanCurrent, leafNamer.str().c_str());
+    leafNamer.str("");
+    leafNamer.clear();
+    leafNamer << "avgHVChanTemp["<<numDetectors<<"]/F";
+    batchTree->Branch("avgHVChanTemp", treeData.avgHVChanTemp, leafNamer.str().c_str());
+    leafNamer.str("");
+    leafNamer.clear();
+    leafNamer << "rawCounts["<<numDetectors<<"]/l";
+    batchTree->Branch("rawCounts", treeData.rawCounts, leafNamer.str().c_str());
+    leafNamer.str("");
+    leafNamer.clear();
+    leafNamer << "rawRates["<<numDetectors<<"]/D";
+    batchTree->Branch("rawRates", treeData.rawRates, leafNamer.str().c_str());
 }
 
 RootOutput::~RootOutput()
@@ -184,124 +220,199 @@ RootOutput::~RootOutput()
 }
 
 void RootOutput::slowControlsEvent(const Events::OrchidSlowControlsEvent& event)
-{
-    if(firstEvent)
-    {//drop slow controlls events that occur between runs, they should be a tiny
-        //minority and would otherwise be a pain to take care of
-        return;
-    }//these two ifs are separated in case I want to change how something is handled
-    if(event.appxTime > runEndEpochTarget)
-    {//drop slow controlls events that occur between runs, they should be a tiny
-        //minority and would otherwise be a pain to take care of
-        return;
-    }
-    //if we are here the event is during an active run
-    for(int i=0; i<event.numVoltageChannels; ++i)
-    {
-        int detNum = detData->mpodToDet(event.boardNumber[i],event.channelNumber[i]);
-        int detInd = detData->detToInd(detNum);
-        treeData.avgChanVolt[detInd] += event.terminalVoltage[i];
-        treeData.avgChanCurrent[detInd] += event.current[i];
-        treeData.avgHVChanTemp[detInd] += event.temperature[i];
-    }
-    ++numSlowCtrls;
+{//we do nothing with slow controls events, for now everything we want is handled 1 level up
+    return;
 }
 
 void RootOutput::dppPsdIntegralEvent(const Events::DppPsdIntegralEvent& event)
 {
     int detNum = detData->digiToDet(event.boardNumber,event.channelNumber);
     int detInd = detData->detToInd(detNum);
-    //handle the first event of the batch
-    if(firstEvent)
-    {
-        this->initSums();
-        this->initRun();
-        firstEvent = false;
-        runStartEpoch = event.appxTime;
-        runEndEpochTarget = runStartEpoch + histIntTimeUs;
-        std::cout << runEndEpochTarget << std::endl;
-    }
     //handle the first event of the detector in question
-    if(firstDetEvent[detInd])
+    if(firstDetEventOfRun)
     {
-        runStartTimeStamp[detInd] = event.timeStamp;
-        firstDetEvent[detInd] = false;
-    }
-    //check to see if this event belongs to the next run
-    if(event.appxTime > runEndEpochTarget)
-    {
-        this->closeRun();
-        runStartEpoch = lastEpoch;
-        runEndEpochTarget = runStartEpoch + histIntTimeUs;
-        for(int i=0; i<numDetectors; ++i)
-        {
-            runStartTimeStamp[i] = lastTimeStamp[i];
-        }
-        this->initRun();
+        firstDetEventOfRun = false;
+        runStartTimeStamp = event.timeStamp;
+        
     }
     //now proceed to handle event normally
-    lastTimeStamp[detInd] = event.timeStamp;
-    lastEpoch = event.appxTime;
+    lastTimeStamp = event.timeStamp;
     double longGate = static_cast<double>(event.longIntegral);
     double psd = ((longGate-static_cast<double>(event.shortIntegral))/longGate);
-    detRun2DHists[detInd]->Fill(longGate,psd);
-    detSum2DHists[detInd]->Fill(longGate,psd);
-    enProjWithoutCutoff[detInd]->Fill(longGate);
-    enProjWithoutCutoffSum[detInd]->Fill(longGate);
-    psdProjWithoutCutoff[detInd]->Fill(psd);
-    psdProjWithoutCutoffSum[detInd]->Fill(psd);
-    treeData.rawCounts[detInd] += 1;
+    int enBin = 1 + longGate/EnPerBin;
+    int psdBin = 0;
+    if (event.longIntegral == 0)
+    {   psdBin = 1025;}
+    else
+    {   psdBin = 1 + static_cast<int>(psd/PsdPerBin);}
+    int globalBin = detRun2DHists[detInd]->GetBin(enBin,psdBin);
+    //detRun2DHists[detInd]->Fill(longGate,psd);
+    detRun2DHists[detInd]->AddBinContent(globalBin, 1.0);
+    //detSum2DHists[detInd]->Fill(longGate,psd);
+    detSum2DHists[detInd]->AddBinContent(globalBin, 1.0);
+    //enProjWithoutCutoff[detInd]->Fill(longGate);
+    enProjWithoutCutoff[detInd]->AddBinContent(enBin, 1.0);
+    //enProjWithoutCutoffSum[detInd]->Fill(longGate);
+    enProjWithoutCutoffSum[detInd]->AddBinContent(enBin, 1.0);
+    std::cout << enProjWithoutCutoffSum[detInd]->GetName() << std::endl;
+    //psdProjWithoutCutoff[detInd]->Fill(psd);
+    std::cout << psdProjWithoutCutoff[detInd]->GetName() << std::endl;
+    psdProjWithoutCutoff[detInd]->AddBinContent(psdBin, 1.0);
+    //psdProjWithoutCutoffSum[detInd]->Fill(psd);
+    psdProjWithoutCutoffSum[detInd]->AddBinContent(psdBin, 1.0);
     if(longGate < detData->psdProjEnThresh[detInd])
     {
-        psdProjWithCutoff[detInd]->Fill(psd);
-        psdProjWithCutoffSum[detInd]->Fill(psd);
+        //psdProjWithCutoff[detInd]->Fill(psd);
+        psdProjWithCutoff[detInd]->AddBinContent(psdBin, 1.0);
+        //psdProjWithCutoffSum[detInd]->Fill(psd);
+        psdProjWithCutoffSum[detInd]->AddBinContent(psdBin, 1.0);
     }
     if(psd < detData->enProjPsdThresh[detInd])
     {
-        enProjWithoutCutoff[detInd]->Fill(longGate);
-        enProjWithoutCutoffSum[detInd]->Fill(longGate);
+        //enProjWithCutoff[detInd]->Fill(longGate);
+        enProjWithCutoff[detInd]->AddBinContent(enBin, 1.0);
+        //enProjWithCutoffSum[detInd]->Fill(longGate);
+        enProjWithCutoffSum[detInd]->AddBinContent(enBin, 1.0);
     }
-    double evTimeMs = static_cast<double>(event.timeStamp - runStartTimeStamp[detInd])/1000.0;
-    eventTimeHists[detInd]->Fill(evTimeMs);
+    double evTimeMs = static_cast<double>(event.timeStamp - runStartTimeStamp)/500000.0;
+    int timeBin = 1 + static_cast<int>(evTimeMs/100);
+    //eventTimeHists[detInd]->Fill(evTimeMs);
+    eventTimeHists[detInd]->AddBinContent(timeBin, 1.0);
 }
 
-void RootOutput::inputFileSwitch(const Events::InputFileSwapEvent& event)
+void RootOutput::newRun(int runNum, unsigned long long startT)
 {
-    if(!event.sameRun)
+    runNumber = runNum;
+    startTime = startT;
+    initRun();
+}
+
+void RootOutput::initRun()
+{
+    ++runNumber;
+    unsigned long long stSeconds = (startTime/1000000);
+    for(int i=0; i<numDetectors; ++i)
     {
-        this->closeRun();
-        runStartEpoch = event.newFileFirstBufferTime;
-        runEndEpochTarget = runStartEpoch + histIntTimeUs;
-        for(int i=0; i<numDetectors; ++i)
-        {
-            runStartTimeStamp[i] = 0;
-            lastTimeStamp[i] = 0;
-            firstDetEvent[i] = true;
-        }
-        this->initRun();
-        return;
+        ostringstream histNamer;
+        ostringstream histTitler;
+        histNamer << "Det_" << detData->detectorNum[i] << "_Run_" << runNumber << "_2D";
+        histTitler << "Det. " << detData->detectorNum[i] << " PSD Vs lGate Starting @ " << stSeconds;
+        detRun2DHists[i] = new TH2F(histNamer.str().c_str(), histTitler.str().c_str(),
+                                    NumEnChannels, 0, 65536, NumPsdChannels, 0.0, 1.0);
+        
+        histNamer.str(""); histNamer.clear();
+        histTitler.str(""); histTitler.clear();
+        histNamer << "Det_" << detData->detectorNum[i] << "_Run_" << runNumber << "_px_thresh";
+        histTitler << "Det. " << detData->detectorNum[i] << " lGate Projection With Cutoff Starting @ " << stSeconds;
+        enProjWithCutoff[i] = new TH1D(histNamer.str().c_str(), histTitler.str().c_str(),
+                                       NumEnChannels, 0, 65536);
+        
+        
+        histNamer.str(""); histNamer.clear();
+        histTitler.str(""); histTitler.clear();
+        histNamer << "Det_" << detData->detectorNum[i] << "_Run_" << runNumber << "_px";
+        histTitler << "Det. " << detData->detectorNum[i] << " lGate Projection Starting @ " << stSeconds;
+        enProjWithoutCutoff[i] = new TH1D(histNamer.str().c_str(), histTitler.str().c_str(),
+                                          NumEnChannels, 0, 65536);
+        
+        
+        histNamer.str(""); histNamer.clear();
+        histTitler.str(""); histTitler.clear();
+        histNamer << "Det_" << detData->detectorNum[i] << "_Run_" << runNumber << "_py_thresh";
+        histTitler << "Det. " << detData->detectorNum[i] << " PSD Projection With Cutoff Starting @ " << stSeconds;
+        psdProjWithCutoff[i] = new TH1D(histNamer.str().c_str(), histTitler.str().c_str(),
+                                        NumPsdChannels, 0.0, 1.0);
+        
+        
+        histNamer.str(""); histNamer.clear();
+        histTitler.str(""); histTitler.clear();
+        histNamer << "Det_" << detData->detectorNum[i] << "_Run_" << runNumber << "_py";
+        histTitler << "Det. " << detData->detectorNum[i] << " PSD Projection Starting @ " << stSeconds;
+        psdProjWithoutCutoff[i] = new TH1D(histNamer.str().c_str(), histTitler.str().c_str(),
+                                           NumPsdChannels, 0.0, 1.0);
+        
+        
+        histNamer.str(""); histNamer.clear();
+        histTitler.str(""); histTitler.clear();
+        histNamer << "Det_" << detData->detectorNum[i] << "_Run_" << runNumber << "_times";
+        histTitler << "Det. " << detData->detectorNum[i] << " EventTimes Starting @ " << stSeconds;
+        eventTimeHists[i] = new TH1D(histNamer.str().c_str(), histTitler.str().c_str(),
+                                     numTimeBin, 0.0, maxTimeEdge);
     }
-    if((event.newFileFirstBufferTime - event.oldFileLastBufferTime) > 7000000)
+    runStartTimeStamp = 0;
+    lastTimeStamp = 0;
+}
+
+void RootOutput::endRun(RunData *runData)
+{
+    //pack the treeData struct with the run data
+    treeData.runNumber = runData->runNumber;
+    treeData.startTime = runData->startTime;
+    treeData.stopTime = runData->stopTime;
+    treeData.centerTime = runData->centerTime;
+    treeData.runTime = runData->runTime;
+    treeData.numDetectors = runData->numDetectors;
+    for(int i=0; i<treeData.numDetectors; ++i)
     {
-        this->closeRun();
-        runStartEpoch = event.newFileFirstBufferTime;
-        runEndEpochTarget = runStartEpoch + histIntTimeUs;
-        for(int i=0; i<numDetectors; ++i)
+        treeData.detNum[i] = runData->detNum[i];
+        treeData.avgChanVolt[i] = runData->avgChanVolt[i];
+        treeData.avgChanCurrent[i] = runData->avgChanCurrent[i];
+        treeData.avgHVChanTemp[i] = runData->avgHVChanTemp[i];
+        treeData.rawCounts[i] = runData->rawCounts[i];
+        treeData.rawRates[i] = runData->rawRates[i];
+    }
+    this->doRoughDtCorrections();
+    //make sure the output file is set
+    outfile->cd();
+    //dump this tree entry
+    batchTree->Fill();
+    for(int i=0; i<numDetectors; ++i)
+    {
+        //write the per run histograms
+        detRun2DHists[i]->Write();
+        enProjWithCutoff[i]->Write();
+        enProjWithoutCutoff[i]->Write();
+        psdProjWithCutoff[i]->Write();
+        psdProjWithoutCutoff[i]->Write();
+        eventTimeHists[i]->Write();
+        //delete the per run histograms
+        delete detRun2DHists[i];
+        delete enProjWithCutoff[i];
+        delete enProjWithoutCutoff[i];
+        delete psdProjWithCutoff[i];
+        delete psdProjWithoutCutoff[i];
+        delete eventTimeHists[i];
+    }
+    //flush the file to make sure hists are sent to disk
+    outfile->Flush();
+}
+
+void RootOutput::doRoughDtCorrections()
+{
+    for(int i=0; i< numDetectors; ++i)
+    {
+        int lastBin = eventTimeHists[i]->FindBin((lastTimeStamp-runStartTimeStamp)/(500000));
+        int emptyBins = 0;
+        int fullBins = 0;
+        for(int j=1; j<lastBin; ++j)
         {
-            runStartTimeStamp[i] = 0;
-            lastTimeStamp[i] = 0;
-            firstDetEvent[i] = true;
+            double binContent = eventTimeHists[i]->GetBinContent(j);
+            if(binContent < 1.0)
+            {
+                emptyBins += 1;
+            }
+            else
+            {
+                fullBins += 1;
+            }
         }
-        this->initRun();
-        return;
+        treeData.roughCorrection[i] = (static_cast<double>(fullBins)/static_cast<double>(fullBins+emptyBins));
     }
 }
 
 void RootOutput::done()
 {
-    //first close out this final run
-    this->closeRun();
-    //now close out the sum spectra
+    //close out the sum spectra
     this->closeSums();
     //now ensure the tree is written
     batchTree->Write();
@@ -309,6 +420,28 @@ void RootOutput::done()
     //now construct the 2D runnum vs en proj and runnum vs psd proj spectra
     this->constructTimeSeriesSpectra();
     //now we are done
+}
+
+void RootOutput::closeSums()
+{
+    outfile->cd();
+    for(int i=0; i<numDetectors; ++i)
+    {
+        //write the per run histograms
+        detSum2DHists[i]->Write();
+        enProjWithCutoffSum[i]->Write();
+        enProjWithoutCutoffSum[i]->Write();
+        psdProjWithCutoffSum[i]->Write();
+        psdProjWithoutCutoffSum[i]->Write();
+        //delete the per run histograms
+        delete detSum2DHists[i];
+        delete enProjWithCutoffSum[i];
+        delete enProjWithoutCutoffSum[i];
+        delete psdProjWithCutoffSum[i];
+        delete psdProjWithoutCutoffSum[i];
+    }
+    //flush the file to make sure hists are sent to disk
+    outfile->Flush();
 }
 
 void RootOutput::constructTimeSeriesSpectra()
@@ -396,192 +529,7 @@ void RootOutput::constructTimeSeriesSpectra()
     delete[] psdProjTimeSeriesWithThresh;
     delete[] enProjTimeSeriesWithoutThresh;
     delete[] psdProjTimeSeriesWithoutThresh;
-}
-
-void RootOutput::initSums()
-{
-    for(int i=0; i<numDetectors; ++i)
-    {
-        ostringstream histNamer;
-        histNamer << "Det_" << detData->detectorNum[i] << "_2D";
-        detSum2DHists[i] = new TH2F(histNamer.str().c_str(),"PSD Vs lGate Batch Sum",NumEnChannels,0,65536,NumPsdChannels,0.0,1.0);
-        histNamer.str("");
-        histNamer.clear();
-        histNamer << "Det_" << detData->detectorNum[i] << "_px_thresh";
-        enProjWithCutoffSum[i] = new TH1D(histNamer.str().c_str(),"lGate Projection With Cutoff Batch Sum",NumEnChannels,0,65536);
-        histNamer.str("");
-        histNamer.clear();
-        histNamer << "Det_" << detData->detectorNum[i] << "_px";
-        enProjWithoutCutoffSum[i] = new TH1D(histNamer.str().c_str(),"lGate Projection Batch Sum",NumEnChannels,0,65536);
-        histNamer.str("");
-        histNamer.clear();
-        histNamer << "Det_" << detData->detectorNum[i] << "_py_thresh";
-        psdProjWithCutoffSum[i] = new TH1D(histNamer.str().c_str(),"PSD Projection With Cutoff Batch Sum",NumPsdChannels,0.0,1.0);
-        histNamer.str("");
-        histNamer.clear();
-        histNamer << "Det_" << detData->detectorNum[i] << "_py";
-        psdProjWithoutCutoffSum[i] = new TH1D(histNamer.str().c_str(),"PSD Projection Batch Sum",NumPsdChannels,0.0,1.0);
-    }
-}
-
-void RootOutput::initRun()
-{
-    numSlowCtrls = 0;
-    ++runNumber;
-    for(int i=0; i<numDetectors; ++i)
-    {
-        ostringstream histNamer;
-        histNamer << "Det_" << detData->detectorNum[i] << "_Run_" << runNumber << "_2D";
-        detRun2DHists[i] = new TH2F(histNamer.str().c_str(),"PSD Vs lGate",NumEnChannels,0,65536,NumPsdChannels,0.0,1.0);
-        histNamer.str("");
-        histNamer.clear();
-        histNamer << "Det_" << detData->detectorNum[i] << "_Run_" << runNumber << "_px_thresh";
-        enProjWithCutoff[i] = new TH1D(histNamer.str().c_str(),"lGate Projection With Cutoff",NumEnChannels,0,65536);
-        histNamer.str("");
-        histNamer.clear();
-        histNamer << "Det_" << detData->detectorNum[i] << "_Run_" << runNumber << "_px";
-        enProjWithoutCutoff[i] = new TH1D(histNamer.str().c_str(),"lGate Projection",NumEnChannels,0,65536);
-        histNamer.str("");
-        histNamer.clear();
-        histNamer << "Det_" << detData->detectorNum[i] << "_Run_" << runNumber << "_py_thresh";
-        psdProjWithCutoff[i] = new TH1D(histNamer.str().c_str(),"PSD Projection With Cutoff",NumPsdChannels,0.0,1.0);
-        histNamer.str("");
-        histNamer.clear();
-        histNamer << "Det_" << detData->detectorNum[i] << "_Run_" << runNumber << "_py";
-        psdProjWithoutCutoff[i] = new TH1D(histNamer.str().c_str(),"PSD Projection",NumPsdChannels,0.0,1.0);
-        histNamer.str("");
-        histNamer.clear();
-        histNamer << "Det_" << detData->detectorNum[i] << "_Run_" << runNumber << "_times";
-        eventTimeHists[i] = new TH1D(histNamer.str().c_str(),"EventTimes",numTimeBin,0.0,maxTimeEdge);
-        runStartTimeStamp[i] = 0;
-        lastTimeStamp[i] = 0;
-    }
-}
-
-void RootOutput::closeRun()
-{
-    outfile->cd();
-    //now make prep the runs entry into the tree
-    this->prepTreeEntry();
-    batchTree->Fill();
-    for(int i=0; i<numDetectors; ++i)
-    {
-        //write the per run histograms
-        detRun2DHists[i]->Write();
-        enProjWithCutoff[i]->Write();
-        enProjWithoutCutoff[i]->Write();
-        psdProjWithCutoff[i]->Write();
-        psdProjWithoutCutoff[i]->Write();
-        eventTimeHists[i]->Write();
-        //delete the per run histograms
-        delete detRun2DHists[i];
-        delete enProjWithCutoff[i];
-        delete enProjWithoutCutoff[i];
-        delete psdProjWithCutoff[i];
-        delete psdProjWithoutCutoff[i];
-        delete eventTimeHists[i];
-    }
-    treeData.clearData();
-    //flush the file to make sure hists are sent to disk
     outfile->Flush();
-}
-
-void RootOutput::closeSums()
-{
-    outfile->cd();
-    for(int i=0; i<numDetectors; ++i)
-    {
-        //write the per run histograms
-        detSum2DHists[i]->Write();
-        enProjWithCutoffSum[i]->Write();
-        enProjWithoutCutoffSum[i]->Write();
-        psdProjWithCutoffSum[i]->Write();
-        psdProjWithoutCutoffSum[i]->Write();
-        //delete the per run histograms
-        delete detSum2DHists[i];
-        delete enProjWithCutoffSum[i];
-        delete enProjWithoutCutoffSum[i];
-        delete psdProjWithCutoffSum[i];
-        delete psdProjWithoutCutoffSum[i];
-    }
-    //flush the file to make sure hists are sent to disk
-    outfile->Flush();
-}
-
-void RootOutput::prepTree()
-{
-    //create the tree
-    batchTree = new TTree("BatchTree","Per Run Data");
-    //now create the scalar branches
-    batchTree->Branch("runN", &treeData.runNumber,"runN/I");
-    batchTree->Branch("startT", &treeData.startTime,"startT/l");
-    batchTree->Branch("stopT", &treeData.stopTime,"stopT/l");
-    batchTree->Branch("centerT", &treeData.centerTime,"centerT/l");
-    batchTree->Branch("runT", &treeData.runTime,"runT/D");
-    //now create the vector branches
-    std::ostringstream leafNamer;
-    leafNamer << "roughDtCorr["<<numDetectors<<"]/F";
-    batchTree->Branch("roughDtCorr", treeData.roughCorrection, leafNamer.str().c_str());
-    leafNamer.str("");
-    leafNamer.clear();
-    leafNamer << "avgChanVolt["<<numDetectors<<"]/F";
-    batchTree->Branch("avgChanVolt", treeData.avgChanVolt, leafNamer.str().c_str());
-    leafNamer.str("");
-    leafNamer.clear();
-    leafNamer << "avgChanCurr["<<numDetectors<<"]/F";
-    batchTree->Branch("avgChanCurr", treeData.avgChanCurrent, leafNamer.str().c_str());
-    leafNamer.str("");
-    leafNamer.clear();
-    leafNamer << "avgHVChanTemp["<<numDetectors<<"]/F";
-    batchTree->Branch("avgHVChanTemp", treeData.avgHVChanTemp, leafNamer.str().c_str());
-    leafNamer.str("");
-    leafNamer.clear();
-    leafNamer << "rawCounts["<<numDetectors<<"]/l";
-    batchTree->Branch("rawCounts", treeData.avgHVChanTemp, leafNamer.str().c_str());
-    leafNamer.str("");
-    leafNamer.clear();
-    leafNamer << "rawRates["<<numDetectors<<"]/D";
-    batchTree->Branch("rawRates", treeData.avgHVChanTemp, leafNamer.str().c_str());
-}
-
-void RootOutput::prepTreeEntry()
-{
-    treeData.runNumber = runNumber;
-    treeData.startTime = runStartEpoch;
-    treeData.stopTime = lastEpoch;
-    treeData.centerTime = (treeData.stopTime + treeData.startTime)/2000000;
-    treeData.runTime = ((static_cast<double>(treeData.stopTime) - static_cast<double>(treeData.startTime))/1000000.0);
-    treeData.setAverages(numSlowCtrls);
-    treeData.setRates();
-    this->doRoughDtCorrections();
-}
-
-void RootOutput::doRoughDtCorrections()
-{
-    for(int i=0; i< numDetectors; ++i)
-    {
-        //from the first bin of the time spectra to the last written bin, find the number of empty bins
-        if(lastTimeStamp[i] < runStartTimeStamp[i])
-        {
-            lastTimeStamp[i] += 140737488355328ULL;
-        }
-        int lastBin = eventTimeHists[i]->FindBin((lastTimeStamp[i]-runStartTimeStamp[i])/(500000));
-        float emptyBins = 0;
-        float fullBins = 0;
-        for(int j=1; j<lastBin; ++j)
-        {
-            double binContent = eventTimeHists[i]->GetBinContent(j);
-            if(binContent < 1.0)
-            {
-                emptyBins += 1.0f;
-            }
-            else
-            {
-                fullBins += 1.0f;
-            }
-        }
-        treeData.roughCorrection[i] = (fullBins/(fullBins+emptyBins));
-    }
 }
 
 }

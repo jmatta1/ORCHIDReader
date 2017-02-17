@@ -37,11 +37,26 @@ namespace Output
 
 struct BatchTreeData
 {
-    BatchTreeData(int numDet):numDetectors(numDet) {}
-    ~BatchTreeData(){}
-    void clearData();
-    void setRates();
-    void setAverages(int numEntries);
+    BatchTreeData(int numDet):numDetectors(numDet)
+    {
+        roughCorrection = new double[numDet];
+        detNum = new int[numDet];
+        avgChanVolt = new float[numDet];
+        avgChanCurrent = new float[numDet];
+        avgHVChanTemp = new float[numDet];
+        rawCounts = new unsigned long long[numDet];
+        rawRates = new double[numDet];
+    }
+    ~BatchTreeData()
+    {
+        delete[] roughCorrection;
+        delete[] detNum;
+        delete[] avgChanVolt;
+        delete[] avgChanCurrent;
+        delete[] avgHVChanTemp;
+        delete[] rawCounts;
+        delete[] rawRates;
+    }
 
     int runNumber;
     unsigned long long startTime;
@@ -49,31 +64,31 @@ struct BatchTreeData
     unsigned long long centerTime;
     double runTime;
     int numDetectors;
-    float roughCorrection[32];
-    int detNum[32];
-    float avgChanVolt[32];
-    float avgChanCurrent[32];
-    float avgHVChanTemp[32];
-    unsigned long long rawCounts[32];
-    double rawRates[32];
+    double* roughCorrection;
+    int* detNum;
+    float* avgChanVolt;
+    float* avgChanCurrent;
+    float* avgHVChanTemp;
+    unsigned long long* rawCounts;
+    double* rawRates;
 };
 
-class RootOutput // : public OutputInterface
+class RootOutput : public OutputInterface
 {
 public:
     RootOutput(InputParser::ConfigData* cData, InputParser::DetData* dData);
     virtual ~RootOutput();
     
-    void slowControlsEvent(const Events::OrchidSlowControlsEvent& event);
-    void dppPsdIntegralEvent(const Events::DppPsdIntegralEvent& event);
-    void inputFileSwitch(const Events::InputFileSwapEvent& event);
-    void done();
+    virtual void slowControlsEvent(const Events::OrchidSlowControlsEvent& event);
+    virtual void dppPsdIntegralEvent(const Events::DppPsdIntegralEvent& event);
+    
+    virtual void newRun(int runNum, unsigned long long startT);
+    virtual void endRun(RunData* runData);
+    virtual void done();
     
 private:
     //private member functions
     void prepTree();
-    void closeRun();
-    void prepTreeEntry();
     void doRoughDtCorrections();
     void initRun();
     void initSums();
@@ -104,18 +119,13 @@ private:
     
     //book keeping
     int numDetectors;
-    unsigned long long histIntTimeUs=0;
-    unsigned long long runStartEpoch = 0;
-    unsigned long long lastEpoch = 0;
-    unsigned long long runEndEpochTarget = 600000000;
-    bool firstDetEvent[32];
-    unsigned long long runStartTimeStamp[32];
-    unsigned long long lastTimeStamp[32];
-    int runNumber = -1;
-    int numSlowCtrls;
-    bool firstEvent = true;
+    bool firstDetEventOfRun;
+    unsigned long long runStartTimeStamp;
+    unsigned long long lastTimeStamp;
     int numTimeBin;
     float maxTimeEdge;
+    int runNumber;
+    unsigned long long startTime;
     //config data
     InputParser::ConfigData* confData;
     InputParser::DetData* detData;
