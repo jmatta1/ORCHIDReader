@@ -25,9 +25,9 @@
 // includes from other libraries
 // includes from ORCHIDReader
 #include"Config/ConfigData.h"
-#include"Output/RootOutput.h"
+#include"Output/OutputSystem.h"
 #include"Events/DppPsdIntegralEvent.h"
-#include"Events/InputFileSwapEvent.h"
+#include"Events/NewFileEvent.h"
 #include"Events/OrchidSlowControlsEvent.h"
 
 namespace Input 
@@ -67,11 +67,11 @@ public:
     OrchidFileReader(InputParser::ConfigData* cData, int numDet);
     ~OrchidFileReader();
     
-    void processFiles(Output::RootOutput* output);
+    void processFiles(Output::OutputSystem* output);
     
 private:
     void readListFile();
-    void processDataBuffer(Output::RootOutput* output, int startInd);
+    void processDataBuffer(Output::OutputSystem* output, int startInd);
     
     std::vector<std::string> fileList;
     char* buffer;
@@ -81,7 +81,7 @@ private:
     unsigned long long currentFileSize;
     
     Events::DppPsdIntegralEvent dppEvent;
-    Events::InputFileSwapEvent fileEvent;
+    Events::NewFileEvent fileEvent;
     Events::OrchidSlowControlsEvent scEvent;
 };
 

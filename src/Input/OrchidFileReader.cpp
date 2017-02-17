@@ -123,7 +123,7 @@ OrchidFileReader::~OrchidFileReader()
     delete[] buffer;
 }
 
-void OrchidFileReader::processFiles(Output::RootOutput* output)
+void OrchidFileReader::processFiles(Output::OutputSystem* output)
 {
     int numFiles = fileList.size();
     for(int i=0; i<numFiles; ++i)
@@ -163,28 +163,22 @@ void OrchidFileReader::processFiles(Output::RootOutput* output)
         infile.read(buffer, BufferSize);
         BufferHeaderData tempBufferData;
         int buffInd = tempBufferData.readFromBuffer(buffer);
-        //make a file swap event if this is not the first file
+        //make a new file event
         if(i==0)
         {
-            //don't generate a swap event for the first file
-            this->currFileData = tempFileHeader;
-            this->currBufferData = tempBufferData;
-            //now process the rest of the buffer we read the header of
-            processDataBuffer(output, buffInd);
-            //now loop through the rest of the file
-            while(fileOffset <= lastBuffer)
-            {
-                infile.read(buffer, BufferSize);
-                buffInd = tempBufferData.readFromBuffer(buffer);
-                this->currBufferData = tempBufferData;
-                processDataBuffer(output, buffInd);
-            }
+            fileEvent.firstFile = true;
+            fileEvent.sameRun = true; //kinda by default here
+            fileEvent.previousFileLastBufferEndTime = 0;
+            fileEvent.newFileHeaderTime = tempFileHeader.fileStartTime;
+            fileEvent.newFileFirstBufferStartTime = tempBufferData.bufferStartTime;
         }
         else
         {
-            //do generate a file swap event
-            fileEvent.newFileFirstBufferTime = tempBufferData.bufferStartTime;
-            fileEvent.oldFileLastBufferTime = currBufferData.bufferStopTime;
+            fileEvent.firstFile = false;
+            fileEvent.previousFileLastBufferEndTime = 0;
+            fileEvent.newFileHeaderTime = tempFileHeader.fileStartTime;
+            fileEvent.newFileFirstBufferStartTime = tempBufferData.bufferStartTime;
+            //figure out if we are in the same run
             fileEvent.sameRun = true;
             if(tempFileHeader.runTitle != currFileData.runTitle ||
                     tempFileHeader.runNumber != currFileData.runNumber ||
@@ -196,24 +190,33 @@ void OrchidFileReader::processFiles(Output::RootOutput* output)
             {//if this is the case then it has been more than 10 seconds since the last file was started so it was probably a pause
                 fileEvent.sameRun = false;
             }
-            output->inputFileSwitch(fileEvent);
-            this->currFileData = tempFileHeader;
+        }
+        output->newFileEvent(fileEvent);
+        //swap the old data out with the new data
+        this->currFileData = tempFileHeader;
+        this->currBufferData = tempBufferData;
+        //now process the rest of the buffer we read the header of
+        processDataBuffer(output, buffInd);
+        int bufferCount = 1;
+        //now loop through the rest of the file
+        while(fileOffset <= lastBuffer)
+        {
+            std::cout << "Reading data buffer "<<bufferCount<<std::endl;
+            infile.read(buffer, BufferSize);
+            buffInd = tempBufferData.readFromBuffer(buffer);
             this->currBufferData = tempBufferData;
-            //now process the rest of the buffer we read the header of
             processDataBuffer(output, buffInd);
-            //now loop through the rest of the file
-            while(fileOffset <= lastBuffer)
-            {
-                infile.read(buffer, BufferSize);
-                buffInd = tempBufferData.readFromBuffer(buffer);
-                this->currBufferData = tempBufferData;
-                processDataBuffer(output, buffInd);
-            }
+            ++bufferCount;
         }
     }
+    time_t currTime;
+    time(&currTime);
+    char timeOutputArray[101];
+    strftime(timeOutputArray, 100, "%Y-%b-%d %H:%M:%S", localtime(&currTime));
+    std::cout<<timeOutputArray<<" Done Processing Files"<<std::endl;
 }
 
-void OrchidFileReader::processDataBuffer(Output::RootOutput* output, int startInd)
+void OrchidFileReader::processDataBuffer(Output::OutputSystem* output, int startInd)
 {
     int bInd = startInd;
     unsigned long long aprxTime;
@@ -228,8 +231,8 @@ void OrchidFileReader::processDataBuffer(Output::RootOutput* output, int startIn
             output->dppPsdIntegralEvent(dppEvent);
             eventCount += 1;
         }
-        else if(buffer[bInd] != 0 && buffer[bInd+2] == 1 && buffer[bInd+3] == 0) // the 2 0 check makes sure a 2 byte value of 2 is written
-        {//slow controls event
+        else if(buffer[bInd] != 0 && buffer[bInd+2] == 1 && buffer[bInd+3] == 0)
+        {// the 2 0 check makes sure a 2 byte value of 2 is written slow controls event
             aprxTime = ((timeDiff*eventCount/currBufferData.eventCount)+currBufferData.bufferStartTime);
             bInd += scEvent.readEvent(buffer + bInd, aprxTime);
             output->slowControlsEvent(scEvent);
@@ -243,6 +246,7 @@ void OrchidFileReader::processDataBuffer(Output::RootOutput* output, int startIn
         else
         {
             std::cout << "Unexpected event issue in ORCHID File Reader" << std::endl;
+            throw std::runtime_error("Bad event code");
         }
     }
 }
