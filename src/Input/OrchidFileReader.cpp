@@ -157,10 +157,12 @@ void OrchidFileReader::processFiles(Output::OutputSystem* output)
         }
         //read and process the file header
         infile.read(buffer, FileHeaderSize);
+        fileOffset += FileHeaderSize;
         FileHeaderData tempFileHeader;
         tempFileHeader.readFromBuffer(buffer);
         //read the first buffer and process its header
         infile.read(buffer, BufferSize);
+        fileOffset += BufferSize;
         BufferHeaderData tempBufferData;
         int buffInd = tempBufferData.readFromBuffer(buffer);
         //make a new file event
@@ -201,8 +203,8 @@ void OrchidFileReader::processFiles(Output::OutputSystem* output)
         //now loop through the rest of the file
         while(fileOffset <= lastBuffer)
         {
-            std::cout << "Reading data buffer "<<bufferCount<<std::endl;
             infile.read(buffer, BufferSize);
+            fileOffset += BufferSize;
             buffInd = tempBufferData.readFromBuffer(buffer);
             this->currBufferData = tempBufferData;
             processDataBuffer(output, buffInd);
