@@ -39,7 +39,6 @@ struct BatchTreeData
 {
     BatchTreeData(int numDet):numDetectors(numDet)
     {
-        roughCorrection = new double[numDet];
         detNum = new int[numDet];
         avgChanVolt = new float[numDet];
         avgChanCurrent = new float[numDet];
@@ -49,7 +48,6 @@ struct BatchTreeData
     }
     ~BatchTreeData()
     {
-        delete[] roughCorrection;
         delete[] detNum;
         delete[] avgChanVolt;
         delete[] avgChanCurrent;
@@ -64,7 +62,6 @@ struct BatchTreeData
     unsigned long long centerTime;
     double runTime;
     int numDetectors;
-    double* roughCorrection;
     int* detNum;
     float* avgChanVolt;
     float* avgChanCurrent;
@@ -79,17 +76,16 @@ public:
     RootOutput(InputParser::ConfigData* cData, InputParser::DetData* dData);
     virtual ~RootOutput();
     
-    virtual void slowControlsEvent(const Events::OrchidSlowControlsEvent& event);
-    virtual void dppPsdIntegralEvent(const Events::DppPsdIntegralEvent& event);
+    virtual void slowControlsEvent(const Events::OrchidSlowControlsEvent& event) final;
+    virtual void dppPsdIntegralEvent(const Events::DppPsdIntegralEvent& event) final;
     
-    virtual void newRun(int runNum, unsigned long long startT);
-    virtual void endRun(RunData* runData);
-    virtual void done();
+    virtual void newRun(int runNum, unsigned long long startT) final;
+    virtual void endRun(RunData* runData) final;
+    virtual void done() final;
     
 private:
     //private member functions
     void prepTree();
-    void doRoughDtCorrections();
     void initRun();
     void initSums();
     void closeSums();
@@ -119,9 +115,9 @@ private:
     
     //book keeping
     int numDetectors;
-    bool firstDetEventOfRun;
-    unsigned long long runStartTimeStamp;
-    unsigned long long lastTimeStamp;
+    bool* firstDetEventOfRun;
+    unsigned long long* runStartTimeStamp;
+    unsigned long long* lastTimeStamp;
     int numTimeBin;
     float maxTimeEdge;
     int runNumber;

@@ -50,6 +50,9 @@ RootOutput::RootOutput(InputParser::ConfigData* cData, InputParser::DetData* dDa
     enProjWithoutCutoffSum = new TH1D*[numDetectors];
     psdProjWithCutoffSum = new TH1D*[numDetectors];
     psdProjWithoutCutoffSum = new TH1D*[numDetectors];
+    firstDetEventOfRun = new bool[numDetectors];
+    runStartTimeStamp = new unsigned long long[numDetectors];
+    lastTimeStamp = new unsigned long long[numDetectors];
     for(int i=0; i<numDetectors; ++i)
     {
         detRun2DHists[i] = nullptr;
@@ -63,6 +66,9 @@ RootOutput::RootOutput(InputParser::ConfigData* cData, InputParser::DetData* dDa
         enProjWithoutCutoffSum[i] = nullptr;
         psdProjWithCutoffSum[i] = nullptr;
         psdProjWithoutCutoffSum[i] = nullptr;
+        firstDetEventOfRun[i] = true;
+        runStartTimeStamp[i] = 0ULL;
+        lastTimeStamp[i] = 0ULL;
     }
     this->initSums();
     //prepare the root tree
@@ -129,9 +135,6 @@ RootOutput::RootOutput(InputParser::ConfigData* cData, InputParser::DetData* dDa
     delete detTree;
     maxTimeEdge = (1.1f*confData->histIntegrationTime/0.001f);
     numTimeBin = static_cast<int>(maxTimeEdge/100.0f);
-    runStartTimeStamp = 0;
-    lastTimeStamp = 0;
-    firstDetEventOfRun = true;
 }
 
 void RootOutput::initSums()
@@ -172,10 +175,6 @@ void RootOutput::prepTree()
     batchTree->Branch("runT", &treeData.runTime,"runT/D");
     //now create the vector branches
     std::ostringstream leafNamer;
-    leafNamer << "roughDtCorr["<<numDetectors<<"]/F";
-    batchTree->Branch("roughDtCorr", treeData.roughCorrection, leafNamer.str().c_str());
-    leafNamer.str("");
-    leafNamer.clear();
     leafNamer << "avgChanVolt["<<numDetectors<<"]/F";
     batchTree->Branch("avgChanVolt", treeData.avgChanVolt, leafNamer.str().c_str());
     leafNamer.str("");
@@ -211,6 +210,10 @@ RootOutput::~RootOutput()
     delete[] enProjWithoutCutoffSum;
     delete[] psdProjWithCutoffSum;
     delete[] psdProjWithoutCutoffSum;
+    delete[] firstDetEventOfRun;
+    delete[] runStartTimeStamp;
+    delete[] lastTimeStamp;
+    
     
     //since done was called the batch tree was written
     delete batchTree;
@@ -229,20 +232,22 @@ void RootOutput::dppPsdIntegralEvent(const Events::DppPsdIntegralEvent& event)
     int detNum = detData->digiToDet(event.boardNumber,event.channelNumber);
     int detInd = detData->detToInd(detNum);
     //handle the first event of the detector in question
-    if(firstDetEventOfRun)
+    if(firstDetEventOfRun[detInd])
     {
-        firstDetEventOfRun = false;
-        runStartTimeStamp = event.timeStamp;
+        firstDetEventOfRun[detInd] = false;
+        runStartTimeStamp[detInd] = event.timeStamp;
         
     }
     //now proceed to handle event normally
-    lastTimeStamp = event.timeStamp;
+    lastTimeStamp[detInd] = event.timeStamp;
     double longGate = static_cast<double>(event.longIntegral);
     double psd = ((longGate-static_cast<double>(event.shortIntegral))/longGate);
-    int enBin = 1 + longGate/EnPerBin;
+    int enBin = 1 + static_cast<int>(longGate/EnPerBin);
     int psdBin = 0;
-    if (event.longIntegral == 0)
+    if (event.longIntegral == 0 || psd>1.0)
     {   psdBin = 1025;}
+    else if(psd<0)
+    {   psdBin = 0;}
     else
     {   psdBin = 1 + static_cast<int>(psd/PsdPerBin);}
     int globalBin = detRun2DHists[detInd]->GetBin(enBin,psdBin);
@@ -251,33 +256,34 @@ void RootOutput::dppPsdIntegralEvent(const Events::DppPsdIntegralEvent& event)
     //detSum2DHists[detInd]->Fill(longGate,psd);
     detSum2DHists[detInd]->AddBinContent(globalBin, 1.0);
     //enProjWithoutCutoff[detInd]->Fill(longGate);
-    enProjWithoutCutoff[detInd]->AddBinContent(enBin, 1.0);
+    enProjWithoutCutoff[detInd]->AddBinContent(enBin);
     //enProjWithoutCutoffSum[detInd]->Fill(longGate);
-    enProjWithoutCutoffSum[detInd]->AddBinContent(enBin, 1.0);
-    std::cout << enProjWithoutCutoffSum[detInd]->GetName() << std::endl;
+    enProjWithoutCutoffSum[detInd]->AddBinContent(enBin);
     //psdProjWithoutCutoff[detInd]->Fill(psd);
-    std::cout << psdProjWithoutCutoff[detInd]->GetName() << std::endl;
-    psdProjWithoutCutoff[detInd]->AddBinContent(psdBin, 1.0);
+    psdProjWithoutCutoff[detInd]->AddBinContent(psdBin);
     //psdProjWithoutCutoffSum[detInd]->Fill(psd);
-    psdProjWithoutCutoffSum[detInd]->AddBinContent(psdBin, 1.0);
+    psdProjWithoutCutoffSum[detInd]->AddBinContent(psdBin);
     if(longGate < detData->psdProjEnThresh[detInd])
     {
         //psdProjWithCutoff[detInd]->Fill(psd);
-        psdProjWithCutoff[detInd]->AddBinContent(psdBin, 1.0);
+        psdProjWithCutoff[detInd]->AddBinContent(psdBin);
         //psdProjWithCutoffSum[detInd]->Fill(psd);
-        psdProjWithCutoffSum[detInd]->AddBinContent(psdBin, 1.0);
+        psdProjWithCutoffSum[detInd]->AddBinContent(psdBin);
     }
     if(psd < detData->enProjPsdThresh[detInd])
     {
         //enProjWithCutoff[detInd]->Fill(longGate);
-        enProjWithCutoff[detInd]->AddBinContent(enBin, 1.0);
+        enProjWithCutoff[detInd]->AddBinContent(enBin);
         //enProjWithCutoffSum[detInd]->Fill(longGate);
-        enProjWithCutoffSum[detInd]->AddBinContent(enBin, 1.0);
+        enProjWithCutoffSum[detInd]->AddBinContent(enBin);
     }
-    double evTimeMs = static_cast<double>(event.timeStamp - runStartTimeStamp)/500000.0;
-    int timeBin = 1 + static_cast<int>(evTimeMs/100);
-    //eventTimeHists[detInd]->Fill(evTimeMs);
-    eventTimeHists[detInd]->AddBinContent(timeBin, 1.0);
+    if(event.timeStamp >= runStartTimeStamp[detInd])
+    {
+        double evTimeMs = static_cast<double>(event.timeStamp - runStartTimeStamp[detInd])/500000.0;
+        int timeBin = 1 + static_cast<int>(evTimeMs/100);
+        //eventTimeHists[detInd]->Fill(evTimeMs);
+        eventTimeHists[detInd]->AddBinContent(timeBin, 1.0);
+    }
 }
 
 void RootOutput::newRun(int runNum, unsigned long long startT)
@@ -289,7 +295,6 @@ void RootOutput::newRun(int runNum, unsigned long long startT)
 
 void RootOutput::initRun()
 {
-    ++runNumber;
     unsigned long long stSeconds = (startTime/1000000);
     for(int i=0; i<numDetectors; ++i)
     {
@@ -338,9 +343,11 @@ void RootOutput::initRun()
         histTitler << "Det. " << detData->detectorNum[i] << " EventTimes Starting @ " << stSeconds;
         eventTimeHists[i] = new TH1D(histNamer.str().c_str(), histTitler.str().c_str(),
                                      numTimeBin, 0.0, maxTimeEdge);
+        
+        this->firstDetEventOfRun[i] = true;
+        this->runStartTimeStamp[i] = 0ULL;
+        this->lastTimeStamp[i] = 0ULL;
     }
-    runStartTimeStamp = 0;
-    lastTimeStamp = 0;
 }
 
 void RootOutput::endRun(RunData *runData)
@@ -361,7 +368,6 @@ void RootOutput::endRun(RunData *runData)
         treeData.rawCounts[i] = runData->rawCounts[i];
         treeData.rawRates[i] = runData->rawRates[i];
     }
-    this->doRoughDtCorrections();
     //make sure the output file is set
     outfile->cd();
     //dump this tree entry
@@ -385,29 +391,6 @@ void RootOutput::endRun(RunData *runData)
     }
     //flush the file to make sure hists are sent to disk
     outfile->Flush();
-}
-
-void RootOutput::doRoughDtCorrections()
-{
-    for(int i=0; i< numDetectors; ++i)
-    {
-        int lastBin = eventTimeHists[i]->FindBin((lastTimeStamp-runStartTimeStamp)/(500000));
-        int emptyBins = 0;
-        int fullBins = 0;
-        for(int j=1; j<lastBin; ++j)
-        {
-            double binContent = eventTimeHists[i]->GetBinContent(j);
-            if(binContent < 1.0)
-            {
-                emptyBins += 1;
-            }
-            else
-            {
-                fullBins += 1;
-            }
-        }
-        treeData.roughCorrection[i] = (static_cast<double>(fullBins)/static_cast<double>(fullBins+emptyBins));
-    }
 }
 
 void RootOutput::done()
