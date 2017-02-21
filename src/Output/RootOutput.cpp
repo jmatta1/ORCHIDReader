@@ -397,11 +397,9 @@ void RootOutput::done()
 {
     //close out the sum spectra
     this->closeSums();
-    //now ensure the tree is written
+    //now ensure the batch tree is written
     batchTree->Write();
     outfile->Flush();
-    //now construct the 2D runnum vs en proj and runnum vs psd proj spectra
-    this->constructTimeSeriesSpectra();
     //now we are done
 }
 
@@ -424,94 +422,6 @@ void RootOutput::closeSums()
         delete psdProjWithoutCutoffSum[i];
     }
     //flush the file to make sure hists are sent to disk
-    outfile->Flush();
-}
-
-void RootOutput::constructTimeSeriesSpectra()
-{
-    int numRuns = runNumber + 1;
-    //create the histogram arrays
-    TH2F** enProjTimeSeriesWithThresh = new TH2F*[numDetectors];
-    TH2F** psdProjTimeSeriesWithThresh = new TH2F*[numDetectors];
-    TH2F** enProjTimeSeriesWithoutThresh = new TH2F*[numDetectors];
-    TH2F** psdProjTimeSeriesWithoutThresh = new TH2F*[numDetectors];
-    //create the histograms
-    for(int i=0; i<numDetectors; ++i)
-    {
-        ostringstream histNamer;
-        histNamer << "Det_" << detData->detectorNum[i] << "_px_thresh_timeseries";
-        enProjTimeSeriesWithThresh[i] = new TH2F(histNamer.str().c_str(),"En Projection With Cutoff Time Series",NumEnChannels,0,65536,numRuns,0.0,numRuns);
-        histNamer.str("");
-        histNamer.clear();
-        histNamer << "Det_" << detData->detectorNum[i] << "_py_thresh_timeseries";
-        psdProjTimeSeriesWithThresh[i] = new TH2F(histNamer.str().c_str(),"Psd Projection With Cutoff Time Series",NumPsdChannels,0.0,1.0,numRuns,0.0,numRuns);
-        histNamer.str("");
-        histNamer.clear();
-        histNamer << "Det_" << detData->detectorNum[i] << "_px_timeseries";
-        enProjTimeSeriesWithoutThresh[i] = new TH2F(histNamer.str().c_str(),"En Projection Time Series",NumEnChannels,0,65536,numRuns,0.0,numRuns);
-        histNamer.str("");
-        histNamer.clear();
-        histNamer << "Det_" << detData->detectorNum[i] << "_py_timeseries";
-        psdProjTimeSeriesWithoutThresh[i] = new TH2F(histNamer.str().c_str(),"Psd Projection Time Series",NumPsdChannels,0.0,1.0,numRuns,0.0,numRuns);
-    }
-    
-    //now fill the time series histograms
-    //first iterate over run number
-    for(int i = 0; i < numRuns; ++i)
-    {
-        //pull the run information from the tree
-        batchTree->GetEntry(i);
-        //now iterate over detector number
-        for(int j=0; j<numDetectors; ++j)
-        {
-            ostringstream hNamer;
-            hNamer << "Det_" << detData->detectorNum[j] << "_Run_" << i << "_px_thresh";
-            TH1D* enProjThresh = (TH1D*)outfile->Get(hNamer.str().c_str());
-            hNamer.str("");
-            hNamer.clear();
-            hNamer << "Det_" << detData->detectorNum[j] << "_Run_" << i << "_px";
-            TH1D* enProj = (TH1D*)outfile->Get(hNamer.str().c_str());
-            hNamer.str("");
-            hNamer.clear();
-            hNamer << "Det_" << detData->detectorNum[j] << "_Run_" << i << "_py_thresh";
-            TH1D* psdProjThresh = (TH1D*)outfile->Get(hNamer.str().c_str());
-            hNamer.str("");
-            hNamer.clear();
-            hNamer << "Det_" << detData->detectorNum[j] << "_Run_" << i << "_py";
-            TH1D* psdProj = (TH1D*)outfile->Get(hNamer.str().c_str());
-            //iterate over energy channel number to fill that row in this time series histogram, divide by the run time to normalize things
-            for(int k=1; k<=NumEnChannels; ++k)
-            {
-                enProjTimeSeriesWithThresh[j]->SetBinContent(i+1,k,enProjThresh->GetBinContent(k)/treeData.runTime);
-                psdProjTimeSeriesWithThresh[j]->SetBinContent(i+1,k,psdProjThresh->GetBinContent(k)/treeData.runTime);
-                enProjTimeSeriesWithoutThresh[j]->SetBinContent(i+1,k,enProj->GetBinContent(k)/treeData.runTime);
-                psdProjTimeSeriesWithoutThresh[j]->SetBinContent(i+1,k,psdProj->GetBinContent(k)/treeData.runTime);
-            }
-            //delete the retrieved histograms from memory
-            delete enProjThresh;
-            delete enProj;
-            delete psdProjThresh;
-            delete psdProj;
-        }
-    }
-    
-    //write and delete the histograms
-    for(int i=0; i<numDetectors; ++i)
-    {
-        enProjTimeSeriesWithThresh[i]->Write();
-        psdProjTimeSeriesWithThresh[i]->Write();
-        enProjTimeSeriesWithoutThresh[i]->Write();
-        psdProjTimeSeriesWithoutThresh[i]->Write();
-        delete enProjTimeSeriesWithThresh[i];
-        delete psdProjTimeSeriesWithThresh[i];
-        delete enProjTimeSeriesWithoutThresh[i];
-        delete psdProjTimeSeriesWithoutThresh[i];
-    }
-    //delete the histogram arrays
-    delete[] enProjTimeSeriesWithThresh;
-    delete[] psdProjTimeSeriesWithThresh;
-    delete[] enProjTimeSeriesWithoutThresh;
-    delete[] psdProjTimeSeriesWithoutThresh;
     outfile->Flush();
 }
 
