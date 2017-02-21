@@ -253,29 +253,19 @@ void RootOutput::dppPsdIntegralEvent(const Events::DppPsdIntegralEvent& event)
     int globalBin = detRun2DHists[detInd]->GetBin(enBin,psdBin);
     //detRun2DHists[detInd]->Fill(longGate,psd);
     detRun2DHists[detInd]->AddBinContent(globalBin, 1.0);
-    //detSum2DHists[detInd]->Fill(longGate,psd);
-    detSum2DHists[detInd]->AddBinContent(globalBin, 1.0);
     //enProjWithoutCutoff[detInd]->Fill(longGate);
     enProjWithoutCutoff[detInd]->AddBinContent(enBin);
-    //enProjWithoutCutoffSum[detInd]->Fill(longGate);
-    enProjWithoutCutoffSum[detInd]->AddBinContent(enBin);
     //psdProjWithoutCutoff[detInd]->Fill(psd);
     psdProjWithoutCutoff[detInd]->AddBinContent(psdBin);
-    //psdProjWithoutCutoffSum[detInd]->Fill(psd);
-    psdProjWithoutCutoffSum[detInd]->AddBinContent(psdBin);
     if(longGate < detData->psdProjEnThresh[detInd])
     {
         //psdProjWithCutoff[detInd]->Fill(psd);
         psdProjWithCutoff[detInd]->AddBinContent(psdBin);
-        //psdProjWithCutoffSum[detInd]->Fill(psd);
-        psdProjWithCutoffSum[detInd]->AddBinContent(psdBin);
     }
     if(psd < detData->enProjPsdThresh[detInd])
     {
         //enProjWithCutoff[detInd]->Fill(longGate);
         enProjWithCutoff[detInd]->AddBinContent(enBin);
-        //enProjWithCutoffSum[detInd]->Fill(longGate);
-        enProjWithCutoffSum[detInd]->AddBinContent(enBin);
     }
     if(event.timeStamp >= runStartTimeStamp[detInd])
     {
@@ -374,6 +364,21 @@ void RootOutput::endRun(RunData *runData)
     batchTree->Fill();
     for(int i=0; i<numDetectors; ++i)
     {
+        //setup the per run histogram statistics
+        detRun2DHists[i]->ResetStats();
+        enProjWithCutoff[i]->ResetStats();
+        enProjWithoutCutoff[i]->ResetStats();
+        psdProjWithCutoff[i]->ResetStats();
+        psdProjWithoutCutoff[i]->ResetStats();
+        eventTimeHists[i]->ResetStats();
+        
+        //add the per run histograms to the sum histograms
+        detSum2DHists[i]->Add(detRun2DHists[i],1.0);
+        enProjWithCutoffSum[i]->Add(enProjWithCutoff[i],1.0);
+        enProjWithoutCutoffSum[i]->Add(enProjWithoutCutoff[i],1.0);
+        psdProjWithCutoffSum[i]->Add(psdProjWithCutoff[i],1.0);
+        psdProjWithoutCutoffSum[i]->Add(psdProjWithoutCutoff[i],1.0);
+        
         //write the per run histograms
         detRun2DHists[i]->Write();
         enProjWithCutoff[i]->Write();
