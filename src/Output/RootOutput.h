@@ -30,6 +30,12 @@
 // includes from ORCHIDReader
 #include"Output/OutputInterface.h"
 
+namespace InputParser
+{
+    class ConfigData;
+    class DetData;
+}
+
 namespace Output
 {
 
@@ -120,6 +126,9 @@ private:
     float maxTimeEdge;
     int runNumber;
     unsigned long long startTime;
+    //config data
+    InputParser::ConfigData* confData;
+    InputParser::DetData* detData;
 };
 
 }
