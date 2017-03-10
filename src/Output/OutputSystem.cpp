@@ -80,7 +80,7 @@ void OutputSystem::newFileEvent(Events::NewFileEvent& event)
             runData.stopTime = event.previousFileLastBufferEndTime;
             runData.closeRun(slowControlsCount);
             std::cout << "  Ending run: " << runData.runNumber << std::endl;
-            for(auto&& x: outputs) x->endRun(&runData);
+            for(auto&& x: outputs) x->endRun(runData);
             slowControlsCount = 0;
             runData.resetCounters();
             runData.startTime = event.newFileFirstBufferStartTime;
@@ -115,7 +115,7 @@ void OutputSystem::slowControlsEvent(Events::OrchidSlowControlsEvent& event)
         runData.stopTime = lastEventTime;
         runData.closeRun(slowControlsCount);
         std::cout << "  Ending run: " << runData.runNumber << std::endl;
-        for(auto&& x: outputs) x->endRun(&runData);
+        for(auto&& x: outputs) x->endRun(runData);
         slowControlsCount = 0;
         runData.resetCounters();
         runData.startTime = event.appxTime;
@@ -151,7 +151,7 @@ void OutputSystem::dppPsdIntegralEvent(Events::DppPsdIntegralEvent& event)
         runData.stopTime = lastEventTime;
         runData.closeRun(slowControlsCount);
         std::cout << "  Ending run: " << runData.runNumber << std::endl;
-        for(auto&& x: outputs) x->endRun(&runData);
+        for(auto&& x: outputs) x->endRun(runData);
         slowControlsCount = 0;
         runData.resetCounters();
         runData.startTime = event.appxTime;
@@ -202,7 +202,7 @@ void OutputSystem::processingDone()
     runData.stopTime = lastEventTime;
     runData.closeRun(slowControlsCount);
     std::cout << "  Ending run: " << runData.runNumber << std::endl;
-    for(auto&& x: outputs) x->endRun(&runData);
+    for(auto&& x: outputs) x->endRun(runData);
     std::cout << "Ending processing" << std::endl;
     for(auto&& x: outputs) x->done();
     std::cout << "Post processing done" << std::endl;
