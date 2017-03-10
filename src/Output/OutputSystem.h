@@ -28,11 +28,17 @@
 // includes from ORCHIDReader
 #include"Output/OutputInterface.h"
 #include"Output/RunData.h"
-#include"Config/ConfigData.h"
-#include"Config/DetData.h"
-#include"Events/OrchidSlowControlsEvent.h"
-#include"Events/DppPsdIntegralEvent.h"
-#include"Events/NewFileEvent.h"
+
+namespace InputParser
+{
+    class ConfigData;
+    class DetData;
+}
+
+namespace Events
+{
+class NewFileEvent;
+}
 
 namespace Output
 {
@@ -65,7 +71,7 @@ private:
     unsigned long long lastRollOverOffset = 0ULL;
     unsigned long long targetRunEndTime = 0ULL;
     unsigned long long lastEventTime = 0ULL;
-    unsigned int slowControlsCount=0;
+    unsigned int slowControlsCount = 0;
 };
 
 }

@@ -22,6 +22,11 @@
 // includes from other libraries
 #include"root/TParameter.h"
 // includes from ORCHIDReader
+#include"Events/OrchidSlowControlsEvent.h"
+#include"Events/DppPsdIntegralEvent.h"
+#include"Output/RunData.h"
+#include"Config/DetData.h"
+#include"Config/ConfigData.h"
 
 namespace Output
 {
@@ -214,7 +219,6 @@ RootOutput::~RootOutput()
     delete[] runStartTimeStamp;
     delete[] lastTimeStamp;
     
-    
     //since done was called the batch tree was written
     delete batchTree;
     //since done was called the outfile was flushed
@@ -340,23 +344,23 @@ void RootOutput::initRun()
     }
 }
 
-void RootOutput::endRun(RunData *runData)
+void RootOutput::endRun(const RunData& runData)
 {
     //pack the treeData struct with the run data
-    treeData.runNumber = runData->runNumber;
-    treeData.startTime = runData->startTime;
-    treeData.stopTime = runData->stopTime;
-    treeData.centerTime = runData->centerTime;
-    treeData.runTime = runData->runTime;
-    treeData.numDetectors = runData->numDetectors;
+    treeData.runNumber = runData.runNumber;
+    treeData.startTime = runData.startTime;
+    treeData.stopTime = runData.stopTime;
+    treeData.centerTime = runData.centerTime;
+    treeData.runTime = runData.runTime;
+    treeData.numDetectors = runData.numDetectors;
     for(int i=0; i<treeData.numDetectors; ++i)
     {
-        treeData.detNum[i] = runData->detNum[i];
-        treeData.avgChanVolt[i] = runData->avgChanVolt[i];
-        treeData.avgChanCurrent[i] = runData->avgChanCurrent[i];
-        treeData.avgHVChanTemp[i] = runData->avgHVChanTemp[i];
-        treeData.rawCounts[i] = runData->rawCounts[i];
-        treeData.rawRates[i] = runData->rawRates[i];
+        treeData.detNum[i] = runData.detNum[i];
+        treeData.avgChanVolt[i] = runData.avgChanVolt[i];
+        treeData.avgChanCurrent[i] = runData.avgChanCurrent[i];
+        treeData.avgHVChanTemp[i] = runData.avgHVChanTemp[i];
+        treeData.rawCounts[i] = runData.rawCounts[i];
+        treeData.rawRates[i] = runData.rawRates[i];
     }
     //make sure the output file is set
     outfile->cd();

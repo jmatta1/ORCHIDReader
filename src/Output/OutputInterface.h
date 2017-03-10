@@ -22,13 +22,18 @@
 // includes for C++ system headers
 // includes from other libraries
 // includes from ORCHIDReader
-#include"Events/OrchidSlowControlsEvent.h"
-#include"Events/DppPsdIntegralEvent.h"
-#include"Events/NewFileEvent.h"
-#include"Output/RunData.h"
+
+namespace Events
+{
+class OrchidSlowControlsEvent;
+class DppPsdIntegralEvent;
+}
+
 
 namespace Output
 {
+
+class RunData;
 
 class OutputInterface
 {
@@ -41,7 +46,7 @@ public:
     
     //larger scale processing
     virtual void newRun(int runNum, unsigned long long startT) = 0;
-    virtual void endRun(RunData* runData) = 0;
+    virtual void endRun(const RunData& runData) = 0;
     virtual void done() = 0;
 };
 

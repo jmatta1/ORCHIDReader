@@ -23,6 +23,11 @@
 // includes for C++ system headers
 // includes from other libraries
 // includes from ORCHIDReader
+#include"Events/OrchidSlowControlsEvent.h"
+#include"Events/DppPsdIntegralEvent.h"
+#include"Events/NewFileEvent.h"
+#include"Config/DetData.h"
+#include"Config/ConfigData.h"
 
 namespace Output
 {

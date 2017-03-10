@@ -29,8 +29,6 @@
 #include"root/TH2F.h"
 // includes from ORCHIDReader
 #include"Output/OutputInterface.h"
-#include"Config/DetData.h"
-#include"Config/ConfigData.h"
 
 namespace Output
 {
@@ -80,7 +78,7 @@ public:
     virtual void dppPsdIntegralEvent(const Events::DppPsdIntegralEvent& event) final;
     
     virtual void newRun(int runNum, unsigned long long startT) final;
-    virtual void endRun(RunData* runData) final;
+    virtual void endRun(const RunData& runData) final;
     virtual void done() final;
     
 private:
@@ -122,9 +120,6 @@ private:
     float maxTimeEdge;
     int runNumber;
     unsigned long long startTime;
-    //config data
-    InputParser::ConfigData* confData;
-    InputParser::DetData* detData;
 };
 
 }
