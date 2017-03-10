@@ -45,6 +45,24 @@ void ConfigData::arrayDataPathSet(const std::string& input)
     arrayDataPathSet_ = true;
 }
 
+void ConfigData::runCsvPathSet(const std::string& input)
+{
+    runCsvPath = input;
+    runCsvPathSet_ = true;
+}
+
+void ConfigData::detMetaDataPathSet(const std::string& input)
+{
+    detMetaDataPath = input;
+    detMetaDataPathSet_ = true;
+}
+
+void ConfigData::batchMetaDataPathSet(const std::string& input)
+{
+    batchMetaDataPath = input;
+    batchMetaDataPathSet_ = true;
+}
+
 void ConfigData::histIntegrationTimeSet(const float& input)
 {
     histIntegrationTime = input;
@@ -67,7 +85,8 @@ bool ConfigData::validate()
 {
     bool retValue =  listFilePathSet_ | histIntegrationTimeSet_ |
                      arrayDataPathSet_ | arrayXPosSet_ | arrayYPosSet_ |
-                     rootFilePathSet_;
+                     rootFilePathSet_ | runCsvPathSet_ | detMetaDataPathSet_ |
+                     batchMetaDataPathSet_;
     
     if(histIntegrationTime <= 1.0)
     {
@@ -89,6 +108,18 @@ void ConfigData::printValidationErrors()
     if(!arrayDataPathSet_)
     {
         std::cout<<"    ArrayDataPath must be set"<<std::endl;
+    }
+    if(!runCsvPathSet_)
+    {
+        std::cout<<"    RunCsvPath must be set"<<std::endl;
+    }
+    if(!detMetaDataPathSet_)
+    {
+        std::cout<<"    DetMetaDataPath must be set"<<std::endl;
+    }
+    if(!batchMetaDataPathSet_)
+    {
+        std::cout<<"    BatchMetaDataPath must be set"<<std::endl;
     }
     if(!arrayXPosSet_)
     {
@@ -115,6 +146,9 @@ return os << "[StartConfig]\n"
     << "    RootFilePath        = "   << cd.rootFilePath        << "\n"
     << "    ListFilePath        = "   << cd.listFilePath        << "\n"
     << "    ArrayDataPath       = "   << cd.arrayDataPath       << "\n"
+    << "    RunCsvPath          = "   << cd.runCsvPath          << "\n"
+    << "    DetMetaDataPath     = "   << cd.detMetaDataPath     << "\n"
+    << "    BatchMetaDataPath   = "   << cd.batchMetaDataPath   << "\n"
     << "    ArrayXPosition      = "   << cd.arrayXPos           << "\n"
     << "    ArrayYPosition      = "   << cd.arrayYPos           << "\n"
     << "    HistIntegrationTime = "   << cd.histIntegrationTime << "\n"

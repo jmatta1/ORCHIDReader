@@ -59,6 +59,9 @@ public:
         listFilePath        = (lexeme["ListFilePath"]        >> '=' > quotedString [phoenix::bind(&ConfigData::listFilePathSet,        ptr, qi::_1)] > separator);
         rootFilePath        = (lexeme["RootFilePath"]        >> '=' > quotedString [phoenix::bind(&ConfigData::rootFilePathSet,        ptr, qi::_1)] > separator);
         arrayDataPath       = (lexeme["ArrayDataPath"]       >> '=' > quotedString [phoenix::bind(&ConfigData::arrayDataPathSet,       ptr, qi::_1)] > separator);
+        runCsvPath          = (lexeme["RunCsvPath"]          >> '=' > quotedString [phoenix::bind(&ConfigData::runCsvPathSet,          ptr, qi::_1)] > separator);
+        detMetaDataPath     = (lexeme["DetMetaDataPath"]     >> '=' > quotedString [phoenix::bind(&ConfigData::detMetaDataPathSet,     ptr, qi::_1)] > separator);
+        batchMetaDataPath   = (lexeme["BatchMetaDataPath"]   >> '=' > quotedString [phoenix::bind(&ConfigData::batchMetaDataPathSet,   ptr, qi::_1)] > separator);
         histIntegrationTime = (lexeme["HistIntegrationTime"] >> '=' > float_       [phoenix::bind(&ConfigData::histIntegrationTimeSet, ptr, qi::_1)] > separator);
         arrayXPos           = (lexeme["ArrayXPosition"]      >> '=' > float_       [phoenix::bind(&ConfigData::arrayXPosSet,           ptr, qi::_1)] > separator);
         arrayYPos           = (lexeme["ArrayYPosition"]      >> '=' > float_       [phoenix::bind(&ConfigData::arrayYPosSet,           ptr, qi::_1)] > separator);
@@ -69,7 +72,8 @@ public:
         configDataRule = lexeme["[StartConfig]"] >> *eol_
             > (
                 listFilePath ^ histIntegrationTime ^ arrayDataPath ^
-                arrayXPos ^ arrayYPos ^ rootFilePath
+                arrayXPos ^ arrayYPos ^ rootFilePath ^ runCsvPath ^
+                detMetaDataPath ^ batchMetaDataPath
             ) > lexeme["[EndConfig]"];
         
         on_error<fail>(startRule,
@@ -92,6 +96,8 @@ private:
     qi::rule<Iterator, qi::blank_type> listFilePath, histIntegrationTime;
     qi::rule<Iterator, qi::blank_type> arrayDataPath, arrayXPos;
     qi::rule<Iterator, qi::blank_type> arrayYPos, rootFilePath;
+    qi::rule<Iterator, qi::blank_type> runCsvPath, detMetaDataPath;
+    qi::rule<Iterator, qi::blank_type> batchMetaDataPath;
     
     // hold the pointer that we are going to bind to
     ConfigData* ptr;

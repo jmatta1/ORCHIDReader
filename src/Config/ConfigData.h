@@ -35,6 +35,9 @@ public:
     std::string listFilePath = "";
     std::string rootFilePath = "";
     std::string arrayDataPath = "";
+    std::string runCsvPath = "";
+    std::string detMetaDataPath = "";
+    std::string batchMetaDataPath = "";
     float histIntegrationTime = 0.0;
     float arrayXPos = 0.0;
     float arrayYPos = 0.0;
@@ -42,6 +45,9 @@ public:
     void listFilePathSet(const std::string& input);
     void rootFilePathSet(const std::string& input);
     void arrayDataPathSet(const std::string& input);
+    void runCsvPathSet(const std::string& input);
+    void detMetaDataPathSet(const std::string& input);
+    void batchMetaDataPathSet(const std::string& input);
     void histIntegrationTimeSet(const float& input);
     void arrayXPosSet(const float& input);
     void arrayYPosSet(const float& input);
@@ -56,6 +62,9 @@ private:
     bool listFilePathSet_ = false;
     bool rootFilePathSet_ = false;
     bool arrayDataPathSet_ = false;
+    bool runCsvPathSet_ = false;
+    bool detMetaDataPathSet_ = false;
+    bool batchMetaDataPathSet_ = false;
     bool histIntegrationTimeSet_ = false;
     bool arrayXPosSet_ = false;
     bool arrayYPosSet_ = false;
