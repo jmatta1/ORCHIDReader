@@ -2,15 +2,15 @@
 # this is the path to the file that will hold all the root histograms and base run data
 RootFilePath="./New_RxOff.root"
 
-# this is the path to a csv file that will hold run summary data
-RunCsvPath="./New_RxOff_RunData.csv"
-
 # this is the path to a csv file that will hold the batch summary data
 BatchMetaDataPath="./New_RxOff_BatchData.csv"
 
 # this is the path to a csv file that will hold the detector summary data for
 # this batch
 DetMetaDataPath="./New_RxOff_DetData.csv"
+
+# this is the path to a csv file that will hold run summary data
+RunCsvPath="./New_RxOff_RunData.csv"
 
 # Below here is input to the program
 
