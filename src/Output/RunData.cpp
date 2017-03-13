@@ -67,18 +67,19 @@ void RunData::calcRates()
 
 void RunData::calcAvgs(int numScEvents)
 {
+    float numEvents = static_cast<float>(numScEvents);
     for(int i=0; i<numDetectors; ++i)
     {
-        avgChanVolt[i] /= numScEvents;
-        avgChanCurrent[i] /= numScEvents;
-        avgHVChanTemp[i] /= numScEvents;
+        avgChanVolt[i] /= numEvents;
+        avgChanCurrent[i] /= numEvents;
+        avgHVChanTemp[i] /= numEvents;
     }
 }
 
 void RunData::closeRun(int numSlowCtrlsEvents)
 {
     centerTime = ((startTime + stopTime)/2);
-    runTime = (static_cast<double>(startTime + stopTime)/1000000.0);
+    runTime = (static_cast<double>(stopTime - startTime)/1000000.0);
     calcRates();
     calcAvgs(numSlowCtrlsEvents);
 }
