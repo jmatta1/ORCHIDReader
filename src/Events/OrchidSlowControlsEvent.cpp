@@ -20,6 +20,8 @@
 #include"OrchidSlowControlsEvent.h"
 // includes for C system headers
 // includes for C++ system headers
+#include<iostream>
+#include<iomanip>
 // includes from other libraries
 // includes from ORCHIDReader
 #include"Utility/GetData.h"
@@ -97,14 +99,14 @@ int OrchidSlowControlsEvent::readEvent(char* buffer, unsigned long long approxim
         //the next 4 bytes are a float representation of the sense voltage in volts
         senseVoltage[i] = getData<float>(buffer, ind);
         ind += 4;
-        //the next 4 bytes are a float representation of the current in amps
-        current[i] += getData<float>(buffer, ind);
+        //the next 4 bytes are a float representation of the current in microamps
+        current[i] = getData<float>(buffer, ind);
         ind += 4;
         //the next 4 bytes are an int representation of the temperature of the channel (in celsius)
-        temperature[i] += getData<int>(buffer, ind);
+        temperature[i] = getData<int>(buffer, ind);
         ind += 4;
         //the last 4 bytes are an int representation of the channel status
-        channelStatus[i].loadFromValue(getData<int>(buffer, ind));
+        channelStatus[i].loadFromValue(getData<unsigned int>(buffer, ind));
         ind += 4;
     }
     return binarySize;
