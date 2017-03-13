@@ -27,6 +27,7 @@
 #include"Config/ConfigData.h"
 #include"Config/DetData.h"
 #include"Output/RootOutput.h"
+#include"Output/CsvOutput.h"
 #include"Input/OrchidFileReader.h"
 
 int main(int argc, char* argv[])
@@ -69,8 +70,10 @@ int main(int argc, char* argv[])
     Output::OutputSystem* output = new Output::OutputSystem(confData, detData);
     //Output::RootOutput* rootOutputter= new Output::RootOutput(&confData, &detData);
     std::unique_ptr<Output::OutputInterface> rootOutput(new Output::RootOutput(confData, detData));
+    std::unique_ptr<Output::OutputInterface> csvOutput(new Output::CsvOutput(confData, detData));
     
     output->addOutputClass(std::move(rootOutput));
+    output->addOutputClass(std::move(csvOutput));
     
     //6) create the ORCHID data reader
     Input::OrchidFileReader* orchidReader = new Input::OrchidFileReader(confData, detData->detectorNum.size());
