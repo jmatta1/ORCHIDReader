@@ -22,6 +22,7 @@
 // includes for C system headers
 // includes for C++ system headers
 #include<fstream>
+#include<chrono>
 // includes from other libraries
 // includes from ORCHIDReader
 #include"OutputInterface.h"
@@ -47,14 +48,19 @@ public:
     
     //larger scale processing
     virtual void newRun(int runNum, unsigned long long startT) final;
-    virtual void endRun(RunData* runData) final;
+    virtual void endRun(const RunData& runData) final;
     virtual void done() final;
     
 private:
+    void writeEpochDateTimePairToStream(unsigned long long epochDuration, std::ostream& out);
+    
     std::ofstream batchCsv;
     std::ofstream runDataFile;
     
-    bool firstRun = true;
+    //store the total number of runs
+    int numRuns=0;
+    //store the last end of run time in us since epoch
+    unsigned long long lastEndOfRun;
 };
 
 }
