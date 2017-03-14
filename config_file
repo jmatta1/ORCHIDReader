@@ -16,9 +16,10 @@ DetMetaDataPath="./New_RxOff_DetData.csv"
 RunCsvPath="./New_RxOff_RunData.csv"
 
 # this option controls if a root tree of the events will be generated
-# while the tree is supremely flexible, it takes a great deal of space and searches
-# in the tree take a great deal of time
-GenerateRootTree = False
+# while the tree is supremely flexible, it takes a great deal of space and
+# searches in the tree take a great deal of time, additionally, activating this
+# option will cause the program to run much more slowly
+GenerateRootTree = True
 
 # This is the path to the root tree output file.
 # this option only needs to be set if GenerateRootTree is True
