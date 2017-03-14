@@ -79,6 +79,7 @@ RootOutput::RootOutput(InputParser::ConfigData* cData, InputParser::DetData* dDa
     //prepare the root tree
     this->prepTree();
     //write constants for the batch out to the file
+    outfile->cd();
     TParameter<int>* tempInt = new TParameter<int>("numDet", numDetectors);
     tempInt->Write();
     TParameter<float>* arrayX = new TParameter<float>("arrayXPos", confData->arrayXPos);
@@ -102,6 +103,7 @@ RootOutput::RootOutput(InputParser::ConfigData* cData, InputParser::DetData* dDa
     batchTree->Branch("xpos", &detXPos,"xpos/I");
     batchTree->Branch("ypos", &detYPos,"ypos/I");
     batchTree->Branch("zpos", &detZPos,"zpos/I");
+    outfile->cd();
     for(int i=0; i<numDetectors; ++i)
     {
         detNum = detData->detectorNum[i];
@@ -135,6 +137,7 @@ RootOutput::RootOutput(InputParser::ConfigData* cData, InputParser::DetData* dDa
         }
         detTree->Fill();
     }
+    outfile->cd();
     detTree->Write();
     outfile->Flush();
     delete detTree;
@@ -384,6 +387,7 @@ void RootOutput::endRun(const RunData& runData)
         psdProjWithoutCutoffSum[i]->Add(psdProjWithoutCutoff[i],1.0);
         
         //write the per run histograms
+        outfile->cd();
         detRun2DHists[i]->Write();
         enProjWithCutoff[i]->Write();
         enProjWithoutCutoff[i]->Write();
@@ -407,6 +411,7 @@ void RootOutput::done()
     //close out the sum spectra
     this->closeSums();
     //now ensure the batch tree is written
+    outfile->cd();
     batchTree->Write();
     outfile->Flush();
     //now we are done
@@ -418,6 +423,7 @@ void RootOutput::closeSums()
     for(int i=0; i<numDetectors; ++i)
     {
         //write the per run histograms
+        outfile->cd();
         detSum2DHists[i]->Write();
         enProjWithCutoffSum[i]->Write();
         enProjWithoutCutoffSum[i]->Write();
