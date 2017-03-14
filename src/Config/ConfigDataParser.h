@@ -67,6 +67,8 @@ public:
         arrayXPos           = (lexeme["ArrayXPosition"]      >> '=' > float_       [phoenix::bind(&ConfigData::arrayXPosSet,           ptr, qi::_1)] > separator);
         arrayYPos           = (lexeme["ArrayYPosition"]      >> '=' > float_       [phoenix::bind(&ConfigData::arrayYPosSet,           ptr, qi::_1)] > separator);
         procFirstBuff       = (lexeme["ProcessFirstBuffer"]  >> '=' > boolSymbols_ [phoenix::bind(&ConfigData::processFirstBufferSet,  ptr, qi::_1)] > separator);
+        genRootTree         = (lexeme["GenerateRootTree"]    >> '=' > boolSymbols_ [phoenix::bind(&ConfigData::generateRootTreeSet,    ptr, qi::_1)] > separator);
+        rootTreeFilePath    = (lexeme["RootTreeFilePath"]    >> '=' > quotedString [phoenix::bind(&ConfigData::rootTreeFilePathSet,    ptr, qi::_1)] > separator);
         
         // define the start rule which holds the whole monstrosity and set the rule to skip blanks
         // if we skipped spaces we could not parse newlines as separators
@@ -75,7 +77,8 @@ public:
             > (
                 listFilePath ^ histIntegrationTime ^ arrayDataPath ^
                 arrayXPos ^ arrayYPos ^ rootFilePath ^ runCsvPath ^
-                detMetaDataPath ^ batchMetaDataPath ^ procFirstBuff
+                detMetaDataPath ^ batchMetaDataPath ^ procFirstBuff ^
+                genRootTree ^ rootTreeFilePath
             ) > lexeme["[EndConfig]"];
         
         on_error<fail>(startRule,
@@ -100,6 +103,7 @@ private:
     qi::rule<Iterator, qi::blank_type> arrayYPos, rootFilePath;
     qi::rule<Iterator, qi::blank_type> runCsvPath, detMetaDataPath;
     qi::rule<Iterator, qi::blank_type> batchMetaDataPath, procFirstBuff;
+    qi::rule<Iterator, qi::blank_type> genRootTree, rootTreeFilePath;
     
     // hold the pointer that we are going to bind to
     ConfigData* ptr;

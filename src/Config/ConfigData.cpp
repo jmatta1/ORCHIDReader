@@ -63,6 +63,12 @@ void ConfigData::batchMetaDataPathSet(const std::string& input)
     batchMetaDataPathSet_ = true;
 }
 
+void ConfigData::rootTreeFilePathSet(const std::string& input)
+{
+    rootTreeFilePath = input;
+    rootTreeFilePathSet_ = true;
+}
+
 void ConfigData::histIntegrationTimeSet(const float& input)
 {
     histIntegrationTime = input;
@@ -87,12 +93,24 @@ void ConfigData::processFirstBufferSet(const bool& input)
     processFirstBufferSet_ = true;
 }
 
+void ConfigData::generateRootTreeSet(const bool& input)
+{
+    generateRootTree = input;
+    generateRootTreeSet_ = true;
+}
+
 bool ConfigData::validate()
 {
     bool retValue =  listFilePathSet_ | histIntegrationTimeSet_ |
                      arrayDataPathSet_ | arrayXPosSet_ | arrayYPosSet_ |
                      rootFilePathSet_ | runCsvPathSet_ | detMetaDataPathSet_ |
-                     batchMetaDataPathSet_ | processFirstBufferSet_;
+                     batchMetaDataPathSet_ | processFirstBufferSet_ |
+                     generateRootTreeSet_;
+
+    if(generateRootTree && !rootTreeFilePathSet_)
+    {
+        retValue = false;
+    }
     
     if(histIntegrationTime <= 1.0)
     {
@@ -142,6 +160,14 @@ void ConfigData::printValidationErrors()
     if(!histIntegrationTimeSet_)
     {
         std::cout<<"    HistIntegrationTime must be set"<<std::endl;
+    }
+    if(!generateRootTreeSet_)
+    {
+        std::cout<<"    GenerateRootTree must be set"<<std::endl;
+    }
+    if(generateRootTree && !rootTreeFilePathSet_)
+    {
+        std::cout<<"    RootTreeFilePath must be set if GenerateRootTree is true"<<std::endl;
     }
     if(histIntegrationTime <= 1.0)
     {
