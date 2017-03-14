@@ -135,6 +135,7 @@ RootOutput::RootOutput(InputParser::ConfigData* cData, InputParser::DetData* dDa
             detType = 50;
             break;
         }
+        outfile->cd();
         detTree->Fill();
     }
     outfile->cd();
