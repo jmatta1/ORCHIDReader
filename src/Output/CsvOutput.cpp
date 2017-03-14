@@ -43,12 +43,16 @@ CsvOutput::CsvOutput(InputParser::ConfigData* cData, InputParser::DetData* dData
     //write what we can for the batch data file
     batchCsv << "Number of Detectors, Array X_Pos, Array Y_Pos, ";
     batchCsv << "Histogram Integration Time, RootOutput, Run Data Csv Path, ";
-    batchCsv << "DetDataCsv, StartEpoch, Start DateTime, EndEpoch, ";
+    batchCsv << "DetDataCsv, SkipFirstBuffer, GenerateTree, TreeOutputFile, ";
+    batchCsv << "StartEpoch, Start DateTime, EndEpoch, ";
     batchCsv << "End DateTime, NumRuns" << std::endl;
     batchCsv << numDet << ", " << cData->arrayXPos << ", ";
     batchCsv << cData->arrayYPos << ", " << cData->histIntegrationTime << ", ";
     batchCsv << cData->rootFilePath << ", " << cData->runCsvPath << ", ";
-    batchCsv << cData->detMetaDataPath << ", ";
+    std::string temp1 = (cData->processFirstBuffer)?"No":"Yes";
+    std::string temp2 = (cData->generateRootTree)?"Yes":"No";
+    batchCsv << cData->detMetaDataPath << ", " << temp1 << ", ";
+    batchCsv << temp2 << ", " << cData->rootTreeFilePath << ", ";
 
     //open, write, and close the full detector data file
     std::ofstream detData(cData->detMetaDataPath.c_str());
