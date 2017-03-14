@@ -163,6 +163,13 @@ void OrchidFileReader::processFiles(Output::OutputSystem* output)
         //read the first buffer and process its header
         infile.read(buffer, BufferSize);
         fileOffset += BufferSize;
+        if(!confData->processFirstBuffer && i==0)
+        {//this is the first file of the batch and we do not want to process the
+            //first buffer, since we just read the first buffer, simply read
+            //the next buffer immediately
+            infile.read(buffer, BufferSize);
+            fileOffset += BufferSize;
+        }
         BufferHeaderData tempBufferData;
         int buffInd = tempBufferData.readFromBuffer(buffer);
         //make a new file event
@@ -199,7 +206,6 @@ void OrchidFileReader::processFiles(Output::OutputSystem* output)
         this->currBufferData = tempBufferData;
         //now process the rest of the buffer we read the header of
         processDataBuffer(output, buffInd);
-        int bufferCount = 1;
         //now loop through the rest of the file
         while(fileOffset <= lastBuffer)
         {
@@ -208,7 +214,6 @@ void OrchidFileReader::processFiles(Output::OutputSystem* output)
             buffInd = tempBufferData.readFromBuffer(buffer);
             this->currBufferData = tempBufferData;
             processDataBuffer(output, buffInd);
-            ++bufferCount;
         }
     }
     time_t currTime;
