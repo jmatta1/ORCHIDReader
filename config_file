@@ -1,4 +1,6 @@
 [StartConfig]
+# This area has the list of files that will have data output to them
+
 # this is the path to the file that will hold all the root histograms and base run data
 RootFilePath="./New_RxOff.root"
 
@@ -11,6 +13,8 @@ DetMetaDataPath="./New_RxOff_DetData.csv"
 
 # this is the path to a csv file that will hold run summary data
 RunCsvPath="./New_RxOff_RunData.csv"
+
+
 
 # Below here is input to the program
 
@@ -33,6 +37,14 @@ ArrayDataPath="./detector_setup_default"
 # big door to the outside, and positive Z is up
 ArrayXPosition=142.0  # Out of the way X position is: 234.0
 ArrayYPosition=73.0  # Out of the way Y position is: 73.0
+
+# sometimes, if there is a substantial lab between the run being changed and a
+# new run being started, processing the first buffer of the first file of the
+# run can seriously affect rates, this affects position scans almost exclusively
+# anyways, this variable allows the system to skip the first buffer of the first
+# file in its scan, if it is true, the buffer is processed, if it is false, the
+# buffer is skipped
+ProcessFirstBuffer = True
 
 # this is the nominal number of seconds to integrate files for
 HistIntegrationTime=600.0

@@ -52,6 +52,7 @@ public:
         using qi::lexeme;
         using qi::float_;
         using Utility::eol_;
+        using Utility::boolSymbols_;
         using qi::fail;
         using qi::on_error;
         using Utility::separator;
@@ -65,6 +66,7 @@ public:
         histIntegrationTime = (lexeme["HistIntegrationTime"] >> '=' > float_       [phoenix::bind(&ConfigData::histIntegrationTimeSet, ptr, qi::_1)] > separator);
         arrayXPos           = (lexeme["ArrayXPosition"]      >> '=' > float_       [phoenix::bind(&ConfigData::arrayXPosSet,           ptr, qi::_1)] > separator);
         arrayYPos           = (lexeme["ArrayYPosition"]      >> '=' > float_       [phoenix::bind(&ConfigData::arrayYPosSet,           ptr, qi::_1)] > separator);
+        procFirstBuff       = (lexeme["ProcessFirstBuffer"]  >> '=' > boolSymbols_ [phoenix::bind(&ConfigData::processFirstBufferSet,  ptr, qi::_1)] > separator);
         
         // define the start rule which holds the whole monstrosity and set the rule to skip blanks
         // if we skipped spaces we could not parse newlines as separators
@@ -73,7 +75,7 @@ public:
             > (
                 listFilePath ^ histIntegrationTime ^ arrayDataPath ^
                 arrayXPos ^ arrayYPos ^ rootFilePath ^ runCsvPath ^
-                detMetaDataPath ^ batchMetaDataPath
+                detMetaDataPath ^ batchMetaDataPath ^ procFirstBuff
             ) > lexeme["[EndConfig]"];
         
         on_error<fail>(startRule,
@@ -97,7 +99,7 @@ private:
     qi::rule<Iterator, qi::blank_type> arrayDataPath, arrayXPos;
     qi::rule<Iterator, qi::blank_type> arrayYPos, rootFilePath;
     qi::rule<Iterator, qi::blank_type> runCsvPath, detMetaDataPath;
-    qi::rule<Iterator, qi::blank_type> batchMetaDataPath;
+    qi::rule<Iterator, qi::blank_type> batchMetaDataPath, procFirstBuff;
     
     // hold the pointer that we are going to bind to
     ConfigData* ptr;

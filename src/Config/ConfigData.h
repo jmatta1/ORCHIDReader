@@ -41,6 +41,7 @@ public:
     float histIntegrationTime = 0.0;
     float arrayXPos = 0.0;
     float arrayYPos = 0.0;
+    bool processFirstBuffer = true;
     
     void listFilePathSet(const std::string& input);
     void rootFilePathSet(const std::string& input);
@@ -51,6 +52,7 @@ public:
     void histIntegrationTimeSet(const float& input);
     void arrayXPosSet(const float& input);
     void arrayYPosSet(const float& input);
+    void processFirstBufferSet(const bool& input);
     
     bool validate();
     void printValidationErrors();
@@ -68,6 +70,7 @@ private:
     bool histIntegrationTimeSet_ = false;
     bool arrayXPosSet_ = false;
     bool arrayYPosSet_ = false;
+    bool processFirstBufferSet_ = false;
 };
 
 }

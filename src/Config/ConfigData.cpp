@@ -81,12 +81,18 @@ void ConfigData::arrayYPosSet(const float& input)
     arrayYPosSet_ = true;
 }
 
+void ConfigData::processFirstBufferSet(const bool& input)
+{
+    processFirstBuffer = input;
+    processFirstBufferSet_ = true;
+}
+
 bool ConfigData::validate()
 {
     bool retValue =  listFilePathSet_ | histIntegrationTimeSet_ |
                      arrayDataPathSet_ | arrayXPosSet_ | arrayYPosSet_ |
                      rootFilePathSet_ | runCsvPathSet_ | detMetaDataPathSet_ |
-                     batchMetaDataPathSet_;
+                     batchMetaDataPathSet_ | processFirstBufferSet_;
     
     if(histIntegrationTime <= 1.0)
     {
@@ -129,6 +135,10 @@ void ConfigData::printValidationErrors()
     {
         std::cout<<"    ArrayYPosition must be set"<<std::endl;
     }
+    if(!processFirstBufferSet_)
+    {
+        std::cout<<"    ProcessFirstBuffer must be set"<<std::endl;
+    }
     if(!histIntegrationTimeSet_)
     {
         std::cout<<"    HistIntegrationTime must be set"<<std::endl;
@@ -142,6 +152,7 @@ void ConfigData::printValidationErrors()
 
 std::ostream& operator<<(std::ostream& os, const ConfigData& cd) 
 {
+    std::string temp = (cd.processFirstBuffer)?"True":"False";
 return os << "[StartConfig]\n"
     << "    RootFilePath        = "   << cd.rootFilePath        << "\n"
     << "    ListFilePath        = "   << cd.listFilePath        << "\n"
@@ -151,6 +162,7 @@ return os << "[StartConfig]\n"
     << "    BatchMetaDataPath   = "   << cd.batchMetaDataPath   << "\n"
     << "    ArrayXPosition      = "   << cd.arrayXPos           << "\n"
     << "    ArrayYPosition      = "   << cd.arrayYPos           << "\n"
+    << "    ProcessFirstBuffer  = "   << temp                   << "\n"
     << "    HistIntegrationTime = "   << cd.histIntegrationTime << "\n"
     << "[EndConfig]\n";
 }
