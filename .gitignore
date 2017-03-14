@@ -37,11 +37,14 @@ build
 # the executable
 orchidReader
 
-# the log files
-*.log
+# the csv output files
+*.csv
 
-# the sqlite files
-*.sqlite
+# the root output files
+*.root
 
-# the temp files to dump to sqlite later
-*.sqlite.temp
+# the raw data files
+data
+
+# the test file list file
+test_list.txt

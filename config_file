@@ -20,7 +20,7 @@ RunCsvPath="./New_RxOff_RunData.csv"
 
 # this is the path to the file that contains the list of paths of raw input
 # files to be parsed for this batch
-ListFilePath="./list_New_RxOff.txt"
+ListFilePath="./test_list.txt"
 
 # this is the file that contains information about the array configuration
 # and detector setup
