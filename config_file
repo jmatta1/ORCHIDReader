@@ -1,5 +1,6 @@
 [StartConfig]
-# This area has the list of files that will have data output to them
+# This area has the list of files that will have data output to them or the option
+# to activate and deactivate certain outputs
 
 # this is the path to the file that will hold all the root histograms and base run data
 RootFilePath="./New_RxOff.root"
@@ -14,6 +15,14 @@ DetMetaDataPath="./New_RxOff_DetData.csv"
 # this is the path to a csv file that will hold run summary data
 RunCsvPath="./New_RxOff_RunData.csv"
 
+# this option controls if a root tree of the events will be generated
+# while the tree is supremely flexible, it takes a great deal of space and searches
+# in the tree take a great deal of time
+GenerateRootTree = False
+
+# This is the path to the root tree output file.
+# this option only needs to be set if GenerateRootTree is True
+RootTreeFilePath = "./New_RxOff_Tree.root"
 
 
 # Below here is input to the program
