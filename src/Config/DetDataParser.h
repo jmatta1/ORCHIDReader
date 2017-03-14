@@ -49,9 +49,7 @@ public:
         using qi::fail;
         using qi::on_error;
         using qi::int_;
-        using qi::hex;
         using qi::float_;
-        using Utility::boolSymbols_;
         using Utility::eol_;
         namespace phoenix = boost::phoenix;
         
@@ -93,6 +91,7 @@ private:
     qi::rule<Iterator, qi::blank_type > lineRule;
     qi::rule<Iterator, qi::blank_type > subLineRule1;
     qi::rule<Iterator, qi::blank_type > subLineRule2;
+    
     
     // hold the pointer that we are going to bind to
     DetData* ptr;
