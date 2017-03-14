@@ -101,10 +101,10 @@ void ConfigData::generateRootTreeSet(const bool& input)
 
 bool ConfigData::validate()
 {
-    bool retValue =  listFilePathSet_ | histIntegrationTimeSet_ |
-                     arrayDataPathSet_ | arrayXPosSet_ | arrayYPosSet_ |
-                     rootFilePathSet_ | runCsvPathSet_ | detMetaDataPathSet_ |
-                     batchMetaDataPathSet_ | processFirstBufferSet_ |
+    bool retValue =  listFilePathSet_ && histIntegrationTimeSet_ &&
+                     arrayDataPathSet_ && arrayXPosSet_ && arrayYPosSet_ &&
+                     rootFilePathSet_ && runCsvPathSet_ && detMetaDataPathSet_ &&
+                     batchMetaDataPathSet_ && processFirstBufferSet_ &&
                      generateRootTreeSet_;
 
     if(generateRootTree && !rootTreeFilePathSet_)
@@ -178,7 +178,8 @@ void ConfigData::printValidationErrors()
 
 std::ostream& operator<<(std::ostream& os, const ConfigData& cd) 
 {
-    std::string temp = (cd.processFirstBuffer)?"True":"False";
+    std::string temp1 = (cd.processFirstBuffer)?"True":"False";
+    std::string temp2 = (cd.generateRootTree)?"True":"False";
 return os << "[StartConfig]\n"
     << "    RootFilePath        = "   << cd.rootFilePath        << "\n"
     << "    ListFilePath        = "   << cd.listFilePath        << "\n"
@@ -188,7 +189,9 @@ return os << "[StartConfig]\n"
     << "    BatchMetaDataPath   = "   << cd.batchMetaDataPath   << "\n"
     << "    ArrayXPosition      = "   << cd.arrayXPos           << "\n"
     << "    ArrayYPosition      = "   << cd.arrayYPos           << "\n"
-    << "    ProcessFirstBuffer  = "   << temp                   << "\n"
+    << "    ProcessFirstBuffer  = "   << temp1                  << "\n"
+    << "    GenerateRootTree    = "   << temp2                  << "\n"
+    << "    RootTreeFilePath    = "   << cd.rootTreeFilePath    << "\n"
     << "    HistIntegrationTime = "   << cd.histIntegrationTime << "\n"
     << "[EndConfig]\n";
 }
