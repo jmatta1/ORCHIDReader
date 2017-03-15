@@ -20,8 +20,8 @@
 // includes for C system headers
 // includes for C++ system headers
 // includes from other libraries
-#include"root/TFile.h"
-#include"root/TTree.h"
+#include"TFile.h"
+#include"TTree.h"
 // includes from ORCHIDReader
 #include"Events/OrchidSlowControlsEvent.h"
 #include"Events/DppPsdIntegralEvent.h"

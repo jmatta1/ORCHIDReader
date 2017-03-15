@@ -37,7 +37,7 @@ include(./CMakeFlagDefs.txt)
 
 # add our default g++ flags
 #add_definitions(-m64 -std=c++14 -D_FILE_OFFSET_BITS=64 -lpthread -I/usr/local/include/root)
-add_definitions(-m64 -march=native -mtune=native -std=c++11 -D_FILE_OFFSET_BITS=64 -I/usr/local/include/root)
+add_definitions(-m64 -march=native -mtune=native -std=c++11 -D_FILE_OFFSET_BITS=64)
 
 # a little hack to make Qt Creator a little happier when it runs cmake to get
 # the project files
@@ -59,6 +59,8 @@ endif(BUILD_TYPE STREQUAL "Release")
 
 # include the boost header dir in my system
 include_directories( ${Boost_INCLUDE_DIR} )
+# include the root header dir
+include_directories( ${ROOT_INCLUDE_DIRS} )
 
 # Grab all the source files
 file(GLOB_RECURSE SRCS *.cpp)
