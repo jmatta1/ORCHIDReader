@@ -18,10 +18,10 @@ project (OrchidReader)
 # find the threading stuff, because we need it for the log
 # find_package(Threads REQUIRED)
 # find ROOT stuff
-find_package(Boost REQUIRED)
+# find_package(Boost REQUIRED)
 list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
 find_package(ROOT COMPONENTS Core RIO Hist Tree REQUIRED)
-
+include_directories( "/home/itm/boost_1_58_0/" )
 # MESSAGE( STATUS "Root Library List:    " ${ROOT_LIBRARIES})
 
 # Add the generated file header directory in this way to allow files in the
@@ -58,7 +58,7 @@ elseif(BUILD_TYPE STREQUAL "Warn_Opt")
 endif(BUILD_TYPE STREQUAL "Release")
 
 # include the boost header dir in my system
-include_directories( ${Boost_INCLUDE_DIR} )
+# include_directories( ${Boost_INCLUDE_DIR} )
 # include the root header dir
 include_directories( ${ROOT_INCLUDE_DIRS} )
 
