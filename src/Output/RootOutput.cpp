@@ -20,7 +20,11 @@
 // includes for C system headers
 // includes for C++ system headers
 // includes from other libraries
-#include"root/TParameter.h"
+#include"TParameter.h"
+#include"TFile.h"
+#include"TTree.h"
+#include"TH1D.h"
+#include"TH2F.h"
 // includes from ORCHIDReader
 #include"Events/OrchidSlowControlsEvent.h"
 #include"Events/DppPsdIntegralEvent.h"

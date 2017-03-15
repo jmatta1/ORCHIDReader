@@ -23,10 +23,6 @@
 #include<string>
 #include<sstream>
 // includes from other libraries
-#include"root/TFile.h"
-#include"root/TTree.h"
-#include"root/TH1F.h"
-#include"root/TH2F.h"
 // includes from ORCHIDReader
 #include"Output/OutputInterface.h"
 
@@ -35,6 +31,11 @@ namespace InputParser
     class ConfigData;
     class DetData;
 }
+
+class TFile;
+class TTree;
+class TH1D;
+class TH2F;
 
 namespace Output
 {
