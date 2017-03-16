@@ -1,4 +1,3 @@
-
 [StartConfig]
 # This area has the list of files that will have data output to them or the option
 # to activate and deactivate certain outputs
@@ -20,7 +19,7 @@ RunCsvPath="./New_RxOff_RunData.csv"
 # while the tree is supremely flexible, it takes a great deal of space and
 # searches in the tree take a great deal of time, additionally, activating this
 # option will cause the program to run much more slowly
-GenerateRootTree = True
+GenerateRootTree = False
 
 # This is the path to the root tree output file.
 # this option only needs to be set if GenerateRootTree is True
@@ -41,7 +40,7 @@ ListFilePath="./test_list.txt"
 #   Detector Types
 #   Energy Projection PSD Threshold
 #   PSD Projection Energy Threshold
-ArrayDataPath="./detector_setup_default"
+ArrayDataPath="./detector_setup_CeBr"
 
 # X and Y positions of the array, 0,0 is the hinge corner of the back door of
 # the MIF, positive X is towards the reactor wall, positive Y is towards the
