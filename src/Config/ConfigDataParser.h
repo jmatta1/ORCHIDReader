@@ -73,7 +73,7 @@ public:
         // define the start rule which holds the whole monstrosity and set the rule to skip blanks
         // if we skipped spaces we could not parse newlines as separators
         startRule = skip(blank) [configDataRule];
-        configDataRule = lexeme["[StartConfig]"] >> *eol_
+        configDataRule = *eol_ >> lexeme["[StartConfig]"] >> *eol_
             > (
                 listFilePath ^ histIntegrationTime ^ arrayDataPath ^
                 arrayXPos ^ arrayYPos ^ rootFilePath ^ runCsvPath ^
