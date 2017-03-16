@@ -19,6 +19,7 @@
 #include"RootOutput.h"
 // includes for C system headers
 // includes for C++ system headers
+#include<iostream>
 // includes from other libraries
 #include"TParameter.h"
 #include"TFile.h"
@@ -95,18 +96,18 @@ RootOutput::RootOutput(InputParser::ConfigData* cData, InputParser::DetData* dDa
     delete arrayX;
     delete arrayY;
     // store the per detector info in a TTree
-    TTree* detTree = new TTree("detData", "Detector Data Tree");
+    TTree* detTree = new TTree("DetData", "Detector Data Tree");
     int detNum, dBrdNum, dChnNum, mBrdNum, mChnNum, detType;
-    batchTree->Branch("detNum", &detNum,"detNum/I");
-    batchTree->Branch("digiBrdNum", &dBrdNum,"digiBrdNum/I");
-    batchTree->Branch("digiChanNum", &dChnNum,"digiChanNum/I");
-    batchTree->Branch("mpodBrdNum", &mBrdNum,"mpodBrdNum/I");
-    batchTree->Branch("mpodChanNum", &mChnNum,"mpodChanNum/I");
-    batchTree->Branch("detType", &detType,"detType/I");
+    detTree->Branch("detNum", &detNum,"detNum/I");
+    detTree->Branch("digiBrdNum", &dBrdNum,"digiBrdNum/I");
+    detTree->Branch("digiChanNum", &dChnNum,"digiChanNum/I");
+    detTree->Branch("mpodBrdNum", &mBrdNum,"mpodBrdNum/I");
+    detTree->Branch("mpodChanNum", &mChnNum,"mpodChanNum/I");
+    detTree->Branch("detType", &detType,"detType/I");
     float detXPos, detYPos, detZPos;
-    batchTree->Branch("xpos", &detXPos,"xpos/I");
-    batchTree->Branch("ypos", &detYPos,"ypos/I");
-    batchTree->Branch("zpos", &detZPos,"zpos/I");
+    detTree->Branch("xpos", &detXPos,"xpos/F");
+    detTree->Branch("ypos", &detYPos,"ypos/F");
+    detTree->Branch("zpos", &detZPos,"zpos/F");
     outfile->cd();
     for(int i=0; i<numDetectors; ++i)
     {
@@ -188,6 +189,10 @@ void RootOutput::prepTree()
     batchTree->Branch("runT", &treeData.runTime,"runT/D");
     //now create the vector branches
     std::ostringstream leafNamer;
+    leafNamer << "detNum["<<numDetectors<<"]/I";
+    batchTree->Branch("detNum", treeData.detNum, leafNamer.str().c_str());
+    leafNamer.str("");
+    leafNamer.clear();
     leafNamer << "avgChanVolt["<<numDetectors<<"]/F";
     batchTree->Branch("avgChanVolt", treeData.avgChanVolt, leafNamer.str().c_str());
     leafNamer.str("");
