@@ -37,9 +37,9 @@ namespace Output
 {
 
 using std::ostringstream;
-static const int NumEnChannels = 8192;
-static const int EnPerBin = 65536/8192;
-static const int NumPsdChannels = 1024;
+static const unsigned int NumEnChannels = 8192;
+static const unsigned int EnPerBin = 65536/8192;
+static const unsigned int NumPsdChannels = 1024;
 static const double PsdPerBin = 1.0f/1024.0f;
 
 RootOutput::RootOutput(InputParser::ConfigData* cData, InputParser::DetData* dData):
@@ -260,6 +260,14 @@ void RootOutput::dppPsdIntegralEvent(const Events::DppPsdIntegralEvent& event)
     double longGate = static_cast<double>(event.longIntegral);
     double psd = ((longGate-static_cast<double>(event.shortIntegral))/longGate);
     int enBin = 1 + static_cast<int>(longGate/EnPerBin);
+    if(enBin < 0)
+    {
+        enBin=0;
+    }
+    else if(enBin > (NumEnChannels+1))
+    {
+        enBin = (NumEnChannels+1);
+    }
     int psdBin = 0;
     if (event.longIntegral == 0 || psd>1.0)
     {   psdBin = 1025;}
@@ -269,7 +277,7 @@ void RootOutput::dppPsdIntegralEvent(const Events::DppPsdIntegralEvent& event)
     {   psdBin = 1 + static_cast<int>(psd/PsdPerBin);}
     int globalBin = detRun2DHists[detInd]->GetBin(enBin,psdBin);
     //detRun2DHists[detInd]->Fill(longGate,psd);
-    detRun2DHists[detInd]->AddBinContent(globalBin, 1.0);
+    detRun2DHists[detInd]->AddBinContent(globalBin);
     //enProjWithoutCutoff[detInd]->Fill(longGate);
     enProjWithoutCutoff[detInd]->AddBinContent(enBin);
     //psdProjWithoutCutoff[detInd]->Fill(psd);
@@ -288,8 +296,16 @@ void RootOutput::dppPsdIntegralEvent(const Events::DppPsdIntegralEvent& event)
     {
         double evTimeMs = static_cast<double>(event.timeStamp - runStartTimeStamp[detInd])/500000.0;
         int timeBin = 1 + static_cast<int>(evTimeMs/100);
+        if(timeBin > numTimeBin+1)
+        {
+            timeBin = (numTimeBin+1);
+        }
+        else if(timeBin < 0)
+        {
+            timeBin = 0;
+        }
         //eventTimeHists[detInd]->Fill(evTimeMs);
-        eventTimeHists[detInd]->AddBinContent(timeBin, 1.0);
+        eventTimeHists[detInd]->AddBinContent(timeBin);
     }
 }
 
