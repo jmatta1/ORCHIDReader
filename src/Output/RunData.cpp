@@ -33,6 +33,15 @@ RunData::RunData(int numDet):numDetectors(numDet)
     avgHVChanTemp = new float[numDetectors];
     rawCounts = new unsigned long long[numDetectors];
     rawRates = new double[numDetectors];
+    for(int i=0; i<numDetectors; ++i)
+    {
+        detNum[i] = 0;
+        avgChanVolt[i] = 0.0f;
+        avgChanCurrent[i] = 0.0f;
+        avgHVChanTemp[i] = 0.0f;
+        rawCounts[i] = 0;
+        rawRates[i] = 0.0;
+    }
 }
 
 RunData::~RunData()
