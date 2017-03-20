@@ -126,6 +126,7 @@ OrchidFileReader::~OrchidFileReader()
 void OrchidFileReader::processFiles(Output::OutputSystem* output)
 {
     int numFiles = fileList.size();
+    int skipCount = 0;
     for(int i=0; i<numFiles; ++i)
     {
         //output the time and file
@@ -136,6 +137,12 @@ void OrchidFileReader::processFiles(Output::OutputSystem* output)
         std::cout<<timeOutputArray<<" Opening file: "<<fileList[i]<<"\n";
         //open the file
         std::ifstream infile(fileList[i].c_str(), std::ios::binary | std::ios::in);
+        if(!infile.good())
+        {
+            std::cout<<"Error in opening file, skipping"<<std::endl;
+            ++skipCount;
+            continue;
+        }
         //get the file's size
         infile.seekg(0,std::ios_base::end);
         currentFileSize = infile.tellg();
@@ -155,6 +162,12 @@ void OrchidFileReader::processFiles(Output::OutputSystem* output)
             fileOffset += BufferDataOffset;
             infile.read(buffer, BufferDataOffset);
         }
+        if((currentFileSize-FileHeaderSize) < BufferSize)
+        {
+            std::cout<<"File has no buffers! Skipping"<<std::endl;
+            ++skipCount;
+            continue;
+        }
         //read and process the file header
         infile.read(buffer, FileHeaderSize);
         fileOffset += FileHeaderSize;
@@ -173,7 +186,7 @@ void OrchidFileReader::processFiles(Output::OutputSystem* output)
         BufferHeaderData tempBufferData;
         int buffInd = tempBufferData.readFromBuffer(buffer);
         //make a new file event
-        if(i==0)
+        if(i==skipCount)
         {
             fileEvent.firstFile = true;
             fileEvent.sameRun = true; //kinda by default here
