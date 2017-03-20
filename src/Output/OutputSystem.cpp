@@ -124,7 +124,7 @@ void OutputSystem::slowControlsEvent(Events::OrchidSlowControlsEvent& event)
         std::cout << "Starting run: " << runData.runNumber << " which starts at: " << runData.startTime << std::endl;
         for(auto&& x: outputs) x->newRun(runData.runNumber, runData.startTime);
     }
-    for(int i=0; i<runData.numDetectors; ++i)
+    for(int i=0; i<event.numVoltageChannels; ++i)
     {
         int detNum = detData->mpodToDet(event.boardNumber[i],event.channelNumber[i]);
         int detInd = detData->detToInd(detNum);
