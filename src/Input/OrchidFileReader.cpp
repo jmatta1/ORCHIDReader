@@ -20,6 +20,7 @@
 // includes for C system headers
 // includes for C++ system headers
 #include<iostream>
+#include<iomanip>
 #include<fstream>
 #include<ctime>
 // includes from other libraries
@@ -102,10 +103,10 @@ void FileHeaderData::readFromBuffer(char* buffer)
     runTitle = std::string(buffer+bInd);
     bInd += 100;
     //the next 4 bytes are the run number
-    runNumber = getData<unsigned long>(buffer, bInd);
+    runNumber = getData<unsigned int>(buffer, bInd);
     bInd += 4;
     //the next 4 bytes are the sequence number
-    sequenceNumber = getData<unsigned long>(buffer, bInd);
+    sequenceNumber = getData<unsigned int>(buffer, bInd);
     //the rest of the file header buffer is blank except for 8 bytes of F0F0...
     //at the very end of the file header buffer
 }
@@ -197,7 +198,7 @@ void OrchidFileReader::processFiles(Output::OutputSystem* output)
         else
         {
             fileEvent.firstFile = false;
-            fileEvent.previousFileLastBufferEndTime = 0;
+            fileEvent.previousFileLastBufferEndTime = this->currBufferData.bufferStopTime;
             fileEvent.newFileHeaderTime = tempFileHeader.fileStartTime;
             fileEvent.newFileFirstBufferStartTime = tempBufferData.bufferStartTime;
             //figure out if we are in the same run
@@ -206,10 +207,18 @@ void OrchidFileReader::processFiles(Output::OutputSystem* output)
                     tempFileHeader.runNumber != currFileData.runNumber ||
                     tempFileHeader.sequenceNumber != (currFileData.sequenceNumber + 1))
             {
+                std::cout<<"First clause\n"<< tempFileHeader.runTitle<< ", "<<currFileData.runTitle<<"\n"
+                        <<tempFileHeader.runNumber<<", "<<currFileData.runNumber<<"   |   "
+                       <<tempFileHeader.sequenceNumber<<", "<<currFileData.sequenceNumber<<"   |   "
+                      <<tempFileHeader.fileStartTime<<", "<<currBufferData.bufferStopTime<<std::endl;
                 fileEvent.sameRun = false;
             }
             else if(tempFileHeader.fileStartTime > (currBufferData.bufferStopTime + 10000000))
             {//if this is the case then it has been more than 10 seconds since the last file was started so it was probably a pause
+                std::cout<<"Second clause\n"<< tempFileHeader.runTitle<< ", "<<currFileData.runTitle<<"\n"
+                        <<tempFileHeader.runNumber<<", "<<currFileData.runNumber<<"   |   "
+                       <<tempFileHeader.sequenceNumber<<", "<<currFileData.sequenceNumber<<"   |   "
+                      <<tempFileHeader.fileStartTime<<", "<<currBufferData.bufferStopTime<<std::endl;
                 fileEvent.sameRun = false;
             }
         }
