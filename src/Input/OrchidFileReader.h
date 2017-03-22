@@ -54,8 +54,8 @@ public:
     unsigned long long fileStartTime;
     std::string fileStartTimeString;
     std::string runTitle;
-    unsigned long runNumber;
-    unsigned long sequenceNumber;
+    unsigned int runNumber;
+    unsigned int sequenceNumber;
     
     FileHeaderData& operator=(const FileHeaderData& rhs);
     void readFromBuffer(char* buffer);
