@@ -153,15 +153,32 @@ void OrchidFileReader::processFiles(Output::OutputSystem* output)
         //handle the weird bug that previous versions had that sometimes wrote
         //a just the header of a data buffer to the beginning of a file, before
         //the file header
-        if(((currentFileSize-FileHeaderSize)%BufferSize) != 0)
+        long long remainder = ((currentFileSize-FileHeaderSize)%BufferSize);
+        if(remainder != 0)
         {//if this is the case then there is an incomplete buffer somewhere,
             //it seems that whenever this happens the incomplete buffer is at
             //the begining of the data stream, at it seems to be the 8192B
             //dataBuffer header for an empty buffer, fix this by simply skipping
             //that
-            std::cout<<"Initial Buffer Fragment! Offsetting start!"<<std::endl;
-            fileOffset += BufferDataOffset;
-            infile.read(buffer, BufferDataOffset);
+            if(remainder == 8192)
+            {
+                std::cout<<"Initial Buffer Fragment! Offsetting start!"<<std::endl;
+                fileOffset += BufferDataOffset;
+                infile.read(buffer, BufferDataOffset);
+                //check to make sure that the chunk read was indeed the weird buffer header
+                unsigned int firstInt = reinterpret_case<int*>(buffer)[0];
+                if(firstInt != 0xf0f0f0f0)
+                {
+                    infile.seekg(0,std::ios_base::beg);
+                    currentFileSize -= remainder;
+                    lastBuffer = (currentFileSize-BufferSize);
+                }
+            }
+            else
+            {
+                currentFileSize -= remainder;
+                lastBuffer = (currentFileSize-BufferSize);
+            }
         }
         if((currentFileSize-FileHeaderSize) < BufferSize)
         {
