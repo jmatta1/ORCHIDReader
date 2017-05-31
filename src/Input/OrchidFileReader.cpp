@@ -160,22 +160,36 @@ void OrchidFileReader::processFiles(Output::OutputSystem* output)
             //the begining of the data stream, at it seems to be the 8192B
             //dataBuffer header for an empty buffer, fix this by simply skipping
             //that
-            if(remainder == 8192)
-            {
+            if(remainder >= 8192)
+            {// if the extra size is greater than or equal to 8192, it could be
+                // a broken buffer, a leading buffer header, *or* both, so first
+                //read the leading 8192 bytes and see if it is a buffer header
+                //if it isn't a buffer header, treat all the remainder as a broken
+                //trailing buffer. If there is a buffer header at the start, then
+                //see if there is more that we need to account for, if there is,
+                //attribute the remaining excess size to a trailing broken buffer
                 std::cout<<"Initial Buffer Fragment! Offsetting start!"<<std::endl;
                 fileOffset += BufferDataOffset;
                 infile.read(buffer, BufferDataOffset);
                 //check to make sure that the chunk read was indeed the weird buffer header
-                unsigned int firstInt = reinterpret_case<int*>(buffer)[0];
+                unsigned int firstInt = reinterpret_cast<int*>(buffer)[0];
                 if(firstInt != 0xf0f0f0f0)
-                {
+                { //there was no leading buffer header, undo our  changes
+                    //and attribute all the remainder to a broken trailing buffer
+                    fileOffset = 0;
                     infile.seekg(0,std::ios_base::beg);
                     currentFileSize -= remainder;
                     lastBuffer = (currentFileSize-BufferSize);
                 }
+                else if(remainder > 8192)
+                {//there was a leading buffer *and* a broken trailing buffer
+                    currentFileSize -= (remainder-8192);
+                    lastBuffer = (currentFileSize-BufferSize);
+                }
             }
             else
-            {
+            {//if the extra size is less than 8192 bytes it cannot be the
+                //wierd buffer thing so assume it is a broken buffer at end
                 currentFileSize -= remainder;
                 lastBuffer = (currentFileSize-BufferSize);
             }
