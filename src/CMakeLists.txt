@@ -2,27 +2,15 @@ cmake_minimum_required (VERSION 2.6)
 # This is the build file for ORCHID (Oak Ridge baCkground at HfIr Daq)
 project (OrchidReader)
 
-# The version number.
-#set(ORCHID_VERSION_MAJOR 0)
-#set(ORCHID_VERSION_MINOR 9)
-#set(ORCHID_VERSION_PATCH 0)
-#set(ORCHID_VERSION ${ORCHID_VERSION_MAJOR}.${ORCHID_VERSION_MINOR}.${ORCHID_VERSION_PATCH})
-
-# Set the version number and build type in the header /Utility/OrchidConfig.h
-#configure_file("${PROJECT_SOURCE_DIR}/Utility/OrchidConfig.h.in"
-#               "${PROJECT_BINARY_DIR}/Utility/OrchidConfig.h"
-#               @ONLY)
-
-# force the existence of the BOOST library package
-# find_package(Boost COMPONENTS thread log log_setup filesystem date_time REQUIRED)
-# find the threading stuff, because we need it for the log
-# find_package(Threads REQUIRED)
 # find ROOT stuff
 # find_package(Boost REQUIRED)
 list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
 find_package(ROOT COMPONENTS Core RIO Hist Tree REQUIRED)
-include_directories( "/home/itm/boost_1_58_0/" )
 # MESSAGE( STATUS "Root Library List:    " ${ROOT_LIBRARIES})
+
+# add the boost header directory
+include_directories( $ENV{BOOST_HEADERS} )
+MESSAGE( STATUS "Boost Header Directory:  " $ENV{BOOST_HEADERS})
 
 # Add the generated file header directory in this way to allow files in the
 # utility directory to access the generated file as if it was
@@ -72,10 +60,13 @@ file(GLOB_RECURSE HDRS *.h)
 # tree unless they are including a file within their own folder
 include_directories(".")
 
+get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+foreach(dir ${dirs})
+  message(STATUS "dir='${dir}'")
+endforeach()
+
 # Set the executable and what it depends on
 add_executable(orchidReader ${SRCS} ${HDRS})
 
 # make sure that the system knows to link the boost libraries
-# target_link_libraries(orchidReader ${Boost_LIBRARIES})
-target_link_libraries(orchidReader ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(orchidReader ${ROOT_LIBRARIES})
