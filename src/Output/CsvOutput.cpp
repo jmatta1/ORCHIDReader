@@ -63,7 +63,7 @@ CsvOutput::CsvOutput(InputParser::ConfigData* cData, InputParser::DetData* dData
     {
         float detXPos = (dData->detXOffset[i] + cData->arrayXPos);
         float detYPos = (dData->detYOffset[i] + cData->arrayYPos);
-        float detZPos = dData->detXOffset[i];
+        float detZPos = dData->detZOffset[i];
         detData << dData->detectorNum[i] << ", " << dData->digiBoardNum[i] << ", ";
         detData << dData->digiChanNum[i] << ", " << dData->mpodBoardNum[i] << ", ";
         detData << dData->mpodChanNum[i] << ", " << dData->detType[i] << ", ";
