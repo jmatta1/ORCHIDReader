@@ -46,7 +46,7 @@ BufferHeaderData& BufferHeaderData::operator=(const BufferHeaderData& rhs)
 
 int BufferHeaderData::readFromBuffer(char* buffer)
 {
-    //the first 8 bytes of a buffer header are 0xF0F0F0F000000002
+    //the first 8 bytes of a buffer header are 0xF0F0F0F0 00000002
     //i.e. the 4 bytes separator value followed bye the 4 bytes buffer id number
     //thus we ignore them
     int bInd = 8;
