@@ -27,6 +27,22 @@
 namespace Events
 {
 
+DppPsdIntegralEvent::DppPsdIntegralEvent(const DppPsdIntegralEvent& rhs):
+    appxTime(rhs.appxTime), boardNumber(rhs.boardNumber), channelNumber(rhs.channelNumber),
+    timeStamp(rhs.timeStamp), longIntegral(rhs.longIntegral), shortIntegral(rhs.shortIntegral),
+    flags(rhs.flags) {}
+
+DppPsdIntegralEvent& DppPsdIntegralEvent::operator=(const DppPsdIntegralEvent& rhs)
+{
+    this->appxTime = rhs.appxTime;
+    this->boardNumber = rhs.boardNumber;
+    this->channelNumber = rhs.channelNumber;
+    this->timeStamp = rhs.timeStamp;
+    this->longIntegral = rhs.longIntegral;
+    this->shortIntegral = rhs.shortIntegral;
+    this->flags = rhs.flags;
+}
+
 int DppPsdIntegralEvent::readEvent(char* buffer, unsigned long long approximateTime)
 {
     appxTime = approximateTime;

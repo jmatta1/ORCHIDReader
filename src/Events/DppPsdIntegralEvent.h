@@ -30,14 +30,21 @@ namespace Events
 class DppPsdIntegralEvent
 {
 public:
+    DppPsdIntegralEvent(){}
+    DppPsdIntegralEvent(const DppPsdIntegralEvent& rhs);
+    
+    DppPsdIntegralEvent& operator=(const DppPsdIntegralEvent& rhs);
+    bool operator<(const DppPsdIntegralEvent &rhs){return this->timeStamp<rhs.timeStamp;}
+    
     int readEvent(char* buffer, unsigned long long approximateTime);
-    unsigned long long appxTime;
-    unsigned char boardNumber;
-    unsigned char channelNumber;
-    unsigned long long timeStamp;
-    unsigned short longIntegral;
-    unsigned short shortIntegral;
-    unsigned char flags;//bit[0] = PUR flag, bit[1] = over-range, bit[2] = trigger lost
+    
+    unsigned long long appxTime=0ULL;
+    unsigned char boardNumber=0;
+    unsigned char channelNumber=0;
+    unsigned long long timeStamp=0ULL;
+    unsigned short longIntegral=0;
+    unsigned short shortIntegral=0;
+    unsigned char flags=0;//bit[0] = PUR flag, bit[1] = over-range, bit[2] = trigger lost
 };
 
 }
