@@ -99,13 +99,19 @@ void ConfigData::generateRootTreeSet(const bool& input)
     generateRootTreeSet_ = true;
 }
 
+void ConfigData::bufferLengthSet(const int& input)
+{
+    bufferLength = input;
+    bufferLengthSet_ = true;
+}
+
 bool ConfigData::validate()
 {
     bool retValue =  listFilePathSet_ && histIntegrationTimeSet_ &&
                      arrayDataPathSet_ && arrayXPosSet_ && arrayYPosSet_ &&
                      rootFilePathSet_ && runCsvPathSet_ && detMetaDataPathSet_ &&
                      batchMetaDataPathSet_ && processFirstBufferSet_ &&
-                     generateRootTreeSet_;
+                     generateRootTreeSet_ && bufferLengthSet_;
 
     if(generateRootTree && !rootTreeFilePathSet_)
     {
@@ -165,6 +171,10 @@ void ConfigData::printValidationErrors()
     {
         std::cout<<"    GenerateRootTree must be set"<<std::endl;
     }
+    if(!bufferLengthSet_)
+    {
+        std::cout<<"    BufferLength must be set"<<std::endl;
+    }
     if(generateRootTree && !rootTreeFilePathSet_)
     {
         std::cout<<"    RootTreeFilePath must be set if GenerateRootTree is true"<<std::endl;
@@ -193,6 +203,7 @@ return os << "[StartConfig]\n"
     << "    GenerateRootTree    = "   << temp2                  << "\n"
     << "    RootTreeFilePath    = "   << cd.rootTreeFilePath    << "\n"
     << "    HistIntegrationTime = "   << cd.histIntegrationTime << "\n"
+    << "    BufferLength        = "   << cd.bufferLength        << "\n"
     << "[EndConfig]\n";
 }
 

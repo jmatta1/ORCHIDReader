@@ -59,4 +59,18 @@ ProcessFirstBuffer = True
 # this is the nominal number of seconds to integrate files for
 HistIntegrationTime=600.0
 
+# The buffer length needs to be long enough that the number of events that are
+# produced by the fastest detector pair across the length of time that it takes
+# for the slowest detector pair to push a single buffer. Since the normal setup
+# has the maximum 1023 events per buffer and the slowest detector pair is the
+# two 3He detectors looking at the different detector configurations in both
+# reactor on and reactor off shows that the worst mismatch comes in reactor off
+# The main position had a combined 3He rate of 3.9Hz and a worst NaI pair rate
+# of 5648Hz. This gives 262.3 seconds per 3He buffer and a min buffer length of
+# 1.481 Million. In the long term out of the way position the combined 3He rate
+# is 28Hz (giving 36.54 seconds per 3He buffer) and a worst NaI pair rate of
+# 32383Hz, giving a minimum buffer length of 1.183 Million. So we set the buffer
+# length to 1.8 Million to give some breathing room in all situations
+BufferLength = 1800000
+
 [EndConfig]

@@ -44,6 +44,7 @@ public:
     float arrayYPos = 0.0;
     bool processFirstBuffer = true;
     bool generateRootTree = false;
+    int bufferLength = 0;
     
     void listFilePathSet(const std::string& input);
     void rootFilePathSet(const std::string& input);
@@ -57,6 +58,7 @@ public:
     void arrayYPosSet(const float& input);
     void processFirstBufferSet(const bool& input);
     void generateRootTreeSet(const bool& input);
+    void bufferLengthSet(const int& input);
     
     bool validate();
     void printValidationErrors();
@@ -77,6 +79,7 @@ private:
     bool processFirstBufferSet_ = false;
     bool generateRootTreeSet_ = false;
     bool rootTreeFilePathSet_ = false;
+    bool bufferLengthSet_ = false;
 };
 
 }
