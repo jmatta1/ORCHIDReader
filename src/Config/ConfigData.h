@@ -23,6 +23,7 @@
 // includes for C system headers
 // includes for C++ system headers
 #include<string>
+#include<vector>
 // includes from other libraries
 // includes from ORCHIDReader
 
@@ -44,7 +45,7 @@ public:
     float arrayYPos = 0.0;
     bool processFirstBuffer = true;
     bool generateRootTree = false;
-    int bufferLength = 0;
+    std::vector<int> bufferLengths;
     
     void listFilePathSet(const std::string& input);
     void rootFilePathSet(const std::string& input);
@@ -58,7 +59,7 @@ public:
     void arrayYPosSet(const float& input);
     void processFirstBufferSet(const bool& input);
     void generateRootTreeSet(const bool& input);
-    void bufferLengthSet(const int& input);
+    void bufferLengthAdd(const int& input);
     
     bool validate();
     void printValidationErrors();
@@ -79,7 +80,6 @@ private:
     bool processFirstBufferSet_ = false;
     bool generateRootTreeSet_ = false;
     bool rootTreeFilePathSet_ = false;
-    bool bufferLengthSet_ = false;
 };
 
 }

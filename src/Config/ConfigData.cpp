@@ -99,10 +99,9 @@ void ConfigData::generateRootTreeSet(const bool& input)
     generateRootTreeSet_ = true;
 }
 
-void ConfigData::bufferLengthSet(const int& input)
+void ConfigData::bufferLengthAdd(const int& input)
 {
-    bufferLength = input;
-    bufferLengthSet_ = true;
+    bufferLengths.push_back(input);
 }
 
 bool ConfigData::validate()
@@ -111,7 +110,7 @@ bool ConfigData::validate()
                      arrayDataPathSet_ && arrayXPosSet_ && arrayYPosSet_ &&
                      rootFilePathSet_ && runCsvPathSet_ && detMetaDataPathSet_ &&
                      batchMetaDataPathSet_ && processFirstBufferSet_ &&
-                     generateRootTreeSet_ && bufferLengthSet_;
+                     generateRootTreeSet_ && (bufferLengths.size() > 0);
 
     if(generateRootTree && !rootTreeFilePathSet_)
     {
@@ -171,9 +170,9 @@ void ConfigData::printValidationErrors()
     {
         std::cout<<"    GenerateRootTree must be set"<<std::endl;
     }
-    if(!bufferLengthSet_)
+    if(bufferLengths.size() < 1)
     {
-        std::cout<<"    BufferLength must be set"<<std::endl;
+        std::cout<<"    BufferLengths must be set"<<std::endl;
     }
     if(generateRootTree && !rootTreeFilePathSet_)
     {
@@ -190,21 +189,25 @@ std::ostream& operator<<(std::ostream& os, const ConfigData& cd)
 {
     std::string temp1 = (cd.processFirstBuffer)?"True":"False";
     std::string temp2 = (cd.generateRootTree)?"True":"False";
-return os << "[StartConfig]\n"
-    << "    RootFilePath        = "   << cd.rootFilePath        << "\n"
-    << "    ListFilePath        = "   << cd.listFilePath        << "\n"
-    << "    ArrayDataPath       = "   << cd.arrayDataPath       << "\n"
-    << "    RunCsvPath          = "   << cd.runCsvPath          << "\n"
-    << "    DetMetaDataPath     = "   << cd.detMetaDataPath     << "\n"
-    << "    BatchMetaDataPath   = "   << cd.batchMetaDataPath   << "\n"
-    << "    ArrayXPosition      = "   << cd.arrayXPos           << "\n"
-    << "    ArrayYPosition      = "   << cd.arrayYPos           << "\n"
-    << "    ProcessFirstBuffer  = "   << temp1                  << "\n"
-    << "    GenerateRootTree    = "   << temp2                  << "\n"
-    << "    RootTreeFilePath    = "   << cd.rootTreeFilePath    << "\n"
-    << "    HistIntegrationTime = "   << cd.histIntegrationTime << "\n"
-    << "    BufferLength        = "   << cd.bufferLength        << "\n"
-    << "[EndConfig]\n";
+    os << "[StartConfig]\n"
+       << "    RootFilePath        = "   << cd.rootFilePath         << "\n"
+       << "    ListFilePath        = "   << cd.listFilePath         << "\n"
+       << "    ArrayDataPath       = "   << cd.arrayDataPath        << "\n"
+       << "    RunCsvPath          = "   << cd.runCsvPath           << "\n"
+       << "    DetMetaDataPath     = "   << cd.detMetaDataPath      << "\n"
+       << "    BatchMetaDataPath   = "   << cd.batchMetaDataPath    << "\n"
+       << "    ArrayXPosition      = "   << cd.arrayXPos            << "\n"
+       << "    ArrayYPosition      = "   << cd.arrayYPos            << "\n"
+       << "    ProcessFirstBuffer  = "   << temp1                   << "\n"
+       << "    GenerateRootTree    = "   << temp2                   << "\n"
+       << "    RootTreeFilePath    = "   << cd.rootTreeFilePath     << "\n"
+       << "    HistIntegrationTime = "   << cd.histIntegrationTime  << "\n"
+       << "    BufferLengths       = ["  << cd.bufferLengths[0];
+    for(int i=1; i < cd.bufferLengths.size(); ++i)
+    {
+        os << ",\n                           " << cd.bufferLengths[i];
+    }
+    return (os << "]\n[EndConfig]\n");
 }
 
 }
