@@ -1,12 +1,9 @@
 /***************************************************************************//**
 ********************************************************************************
 **
-** @file OrchidFileReader.h
 ** @author James Till Matta
-** @date 03 Feb, 2017
-** @brief
 **
-** @copyright Copyright (C) 2016 James Till Matta
+** @copyright Copyright (C) 2018 James Till Matta
 **
 ** This program is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -16,8 +13,8 @@
 **
 ********************************************************************************
 *******************************************************************************/
-#ifndef ORCHIDREADER_SRC_INPUT_ORCHIDFILEREADER_H
-#define ORCHIDREADER_SRC_INPUT_ORCHIDFILEREADER_H
+#ifndef ORCHIDREADER_SRC_INPUT_BUFFERHEADERDATA_H
+#define ORCHIDREADER_SRC_INPUT_BUFFERHEADERDATA_H
 // includes for C system headers
 // includes for C++ system headers
 #include<string>
@@ -31,33 +28,20 @@
 #include"Events/OrchidSlowControlsEvent.h"
 #include"BufferHeaderData.h"
 #include"FileHeaderData.h"
-
 namespace Input 
 {
 
-class OrchidFileReader
+struct BufferHeaderData
 {
 public:
-    OrchidFileReader(InputParser::ConfigData* cData, int numDet);
-    ~OrchidFileReader();
+    unsigned int eventCount;
+    unsigned int bufferNumber;
+    unsigned long long bufferStartTime;
+    unsigned long long bufferStopTime;
     
-    void processFiles(Output::OutputSystem* output);
-    
-private:
-    void readListFile();
-    void processDataBuffer(Output::OutputSystem* output, int startInd);
-    
-    std::vector<std::string> fileList;
-    char* buffer;
-    InputParser::ConfigData* confData;
-    BufferHeaderData currBufferData;
-    FileHeaderData currFileData;
-    unsigned long long currentFileSize;
-    
-    Events::DppPsdIntegralEvent dppEvent;
-    Events::NewFileEvent fileEvent;
-    Events::OrchidSlowControlsEvent scEvent;
+    BufferHeaderData& operator=(const BufferHeaderData& rhs);
+    int readFromBuffer(char* buffer);
 };
 
 }
-#endif //ORCHIDREADER_SRC_INPUT_ORCHIDFILEREADER_H
+#endif //ORCHIDREADER_SRC_INPUT_BUFFERHEADERDATA_H

@@ -25,7 +25,7 @@
 #include<ctime>
 // includes from other libraries
 // includes from ORCHIDReader
-#include"Utility/GetData.h"
+
 
 
 namespace Input 
@@ -35,81 +35,6 @@ static const unsigned long long FileHeaderSize = 4096;
 static const unsigned long long BufferSize = 2*1024*1024;
 static const unsigned long long BufferDataSize = (2*1024*1024-8192);
 static const unsigned long long BufferDataOffset = 8192;
-
-BufferHeaderData& BufferHeaderData::operator=(const BufferHeaderData& rhs)
-{
-    eventCount      = rhs.eventCount;
-    bufferNumber    = rhs.bufferNumber;
-    bufferStartTime = rhs.bufferStartTime;
-    bufferStopTime  = rhs.bufferStopTime;
-}
-
-int BufferHeaderData::readFromBuffer(char* buffer)
-{
-    //the first 8 bytes of a buffer header are 0xF0F0F0F0 00000002
-    //i.e. the 4 bytes separator value followed bye the 4 bytes buffer id number
-    //thus we ignore them
-    int bInd = 8;
-    //the next 4 bytes are the number of events, regular and slow controls, that are in the buffer
-    eventCount = getData<unsigned int>(buffer, bInd);
-    bInd += 4;
-    //the next 4 bytes is the sequence number of this buffer within the file
-    bufferNumber = getData<unsigned int>(buffer, bInd);
-    bInd += 4;
-    //the next 8 bytes are the start time, in microseconds since unix epoch of writing the buffer
-    bufferStartTime = getData<unsigned long long>(buffer, bInd);
-    bInd += 8;
-    //the next 8 bytes are the stop time, in microseconds since unix epoch of writing the buffer
-    bufferStopTime= getData<unsigned long long>(buffer, bInd);
-    bInd += 8;
-    //the rest of the buffer header contains CRC checks of the buffer contents.
-    //in future versions perform the check and mark bad sections in a bit array to
-    //added to the class in the future
-    
-    //now return the size of the buffer header in bytes
-    return 8192;
-}
-
-FileHeaderData& FileHeaderData::operator=(const FileHeaderData& rhs)
-{
-    orchidMajorVer      = rhs.orchidMajorVer;
-    orchidMinorVer      = rhs.orchidMinorVer;
-    orchidPatchVer      = rhs.orchidPatchVer;
-    fileStartTime       = rhs.fileStartTime;
-    fileStartTimeString = rhs.fileStartTimeString;
-    runTitle            = rhs.runTitle;
-    runNumber           = rhs.runNumber;
-    sequenceNumber      = rhs.sequenceNumber;
-}
-
-void FileHeaderData::readFromBuffer(char* buffer)
-{
-    //skip the byte ordering long and the buffer type identifier
-    int bInd = 12;
-    //the next 3 sets of two bytes contain the orchid major, minor, and patch versions
-    orchidMajorVer = getData<unsigned short>(buffer, bInd);
-    bInd += 2;
-    orchidMinorVer = getData<unsigned short>(buffer, bInd);
-    bInd += 2;
-    orchidPatchVer = getData<unsigned short>(buffer, bInd);
-    bInd += 2;
-    //the next 8 bytes are the posix trime in microseconds
-    fileStartTime = getData<unsigned long long>(buffer, bInd);
-    bInd += 8;
-    //the next 30 bytes are effectively a cstring with the iso extended time string (26 chars) followed by padding /0 chars
-    fileStartTimeString = std::string(buffer + bInd);
-    bInd += 30;
-    //the next 100 bytes are up to 99 characters of the run title followed by padding /0 characters
-    runTitle = std::string(buffer+bInd);
-    bInd += 100;
-    //the next 4 bytes are the run number
-    runNumber = getData<unsigned int>(buffer, bInd);
-    bInd += 4;
-    //the next 4 bytes are the sequence number
-    sequenceNumber = getData<unsigned int>(buffer, bInd);
-    //the rest of the file header buffer is blank except for 8 bytes of F0F0...
-    //at the very end of the file header buffer
-}
 
 OrchidFileReader::OrchidFileReader(InputParser::ConfigData* cData, int numDet):
     confData(cData), scEvent(numDet)
@@ -239,17 +164,17 @@ void OrchidFileReader::processFiles(Output::OutputSystem* output)
                     tempFileHeader.sequenceNumber != (currFileData.sequenceNumber + 1))
             {
                 std::cout<<"First clause\n"<< tempFileHeader.runTitle<< ", "<<currFileData.runTitle<<"\n"
-                        <<tempFileHeader.runNumber<<", "<<currFileData.runNumber<<"   |   "
-                       <<tempFileHeader.sequenceNumber<<", "<<currFileData.sequenceNumber<<"   |   "
-                      <<tempFileHeader.fileStartTime<<", "<<currBufferData.bufferStopTime<<std::endl;
+                         <<tempFileHeader.runNumber<<", "<<currFileData.runNumber<<"   |   "
+                         <<tempFileHeader.sequenceNumber<<", "<<currFileData.sequenceNumber<<"   |   "
+                         <<tempFileHeader.fileStartTime<<", "<<currBufferData.bufferStopTime<<std::endl;
                 fileEvent.sameRun = false;
             }
             else if(tempFileHeader.fileStartTime > (currBufferData.bufferStopTime + 10000000))
             {//if this is the case then it has been more than 10 seconds since the last file was started so it was probably a pause
                 std::cout<<"Second clause\n"<< tempFileHeader.runTitle<< ", "<<currFileData.runTitle<<"\n"
-                        <<tempFileHeader.runNumber<<", "<<currFileData.runNumber<<"   |   "
-                       <<tempFileHeader.sequenceNumber<<", "<<currFileData.sequenceNumber<<"   |   "
-                      <<tempFileHeader.fileStartTime<<", "<<currBufferData.bufferStopTime<<std::endl;
+                         <<tempFileHeader.runNumber<<", "<<currFileData.runNumber<<"   |   "
+                         <<tempFileHeader.sequenceNumber<<", "<<currFileData.sequenceNumber<<"   |   "
+                         <<tempFileHeader.fileStartTime<<", "<<currBufferData.bufferStopTime<<std::endl;
                 fileEvent.sameRun = false;
             }
         }
